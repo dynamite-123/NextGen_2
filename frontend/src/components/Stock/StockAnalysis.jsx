@@ -17,20 +17,41 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'rec
 
 import { useState } from "react";
 import InvestmentForm from "./InvestmentForm";
-import InvestmentResult from "./InvestmentResult";
 
 const ParentComponent = () => {
   const [investmentData, setInvestmentData] = useState(null);
 
+  const handleFormSubmit = (data) => {
+    setInvestmentData(data);
+  };
+
   return (
-    <div className="p-6">
-      <h2 className="text-xl font-bold text-white mb-4">Investment Details</h2>
-      <InvestmentForm onResponse={setInvestmentData} />
-      <InvestmentResult data={investmentData} />
+    <div className="min-h-screen bg-[#020c1b] text-white flex flex-col items-center p-6">
+      <h1 className="text-2xl font-bold mb-6">Stock Investment Recommendations</h1>
+      <InvestmentForm onSubmit={handleFormSubmit} />
+      {investmentData && (
+        <div className="mt-6 max-w-4xl w-full">
+          <h2 className="text-xl font-semibold mb-4">Recommended Stocks</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {investmentData.stocks.slice(0, 6).map((stock, index) => (
+              <div key={index} className="p-4 bg-gray-800 rounded-lg shadow-md">
+                <h3 className="font-semibold text-lg">
+                  {stock.company_name} ({stock.stock_symbol})
+                </h3>
+                <p className="text-blue-400">{stock.reason}</p>
+                <p className="text-gray-400">Market Cap: {stock.market_cap_category}</p>
+                <p className="text-gray-400">Sector: {stock.primary_sector}</p>
+              </div>
+            ))}
+          </div>
+          <p className="text-gray-500 text-sm mt-4">{investmentData.disclaimer}</p>
+        </div>
+      )}
     </div>
   );
 };
 
+export default ParentComponent;
 
 
 
