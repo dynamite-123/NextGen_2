@@ -1,0 +1,200 @@
+import React, { createContext, useContext, useState, useEffect } from 'react';
+
+const AuthContext = createContext(null);
+const StockContext = createContext(null);
+const MarketContext = createContext(null);
+
+export const AppProvider = ({ children }) => {
+  // Auth state
+  const [user, setUser] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Stock search state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [selectedStock, setSelectedStock] = useState(null);
+
+  // Market overview state
+  const [niftyData, setNiftyData] = useState([]);
+  const [marketLoading, setMarketLoading] = useState(true);
+  const [marketError, setMarketError] = useState(null);
+
+  // ✅ Fetch & Parse NIFTY50 Data from Yahoo Finance API
+  useEffect(() => {
+    const fetchNiftyData = async () => {
+      try {
+        setMarketLoading(true);
+        const response = await fetch('http://localhost:5000/nifty50');
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch NIFTY50 data');
+        }
+
+        const data = await response.json();
+
+        // Validate the Yahoo Finance API response structure
+        if (!data?.chart?.result?.[0]) {
+          throw new Error("Invalid API response structure: Missing chart data");
+        }
+
+        const result = data.chart.result[0];
+        const timestamps = result.timestamp || [];
+        const quotes = result.indicators?.quote?.[0] || {};
+        
+        // Transform the data into the required format
+        const transformedData = timestamps.map((timestamp, index) => ({
+          date: new Date(timestamp * 1000).toLocaleDateString(),
+          open: quotes.open?.[index] ?? null,
+          high: quotes.high?.[index] ?? null,
+          low: quotes.low?.[index] ?? null,
+          close: quotes.close?.[index] ?? null,
+          volume: quotes.volume?.[index] ?? null,
+        })).filter(item => 
+          item.open !== null && 
+          item.high !== null && 
+          item.low !== null && 
+          item.close !== null
+        );
+        setNiftyData(transformedData);
+        
+      } catch (err) {
+        console.error("Error fetching Nifty 50 data:", err);
+        setMarketError(err.message);
+        setNiftyData([]); // Set empty array on error
+      } finally {
+        setMarketLoading(false);
+      }
+    };
+
+    fetchNiftyData();
+    const interval = setInterval(fetchNiftyData, 60000); // Refresh every 60 sec
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const login = (userData) => {
+    setUser(userData);
+    setIsAuthenticated(true);
+  };
+
+  const logout = () => {
+    setUser(null);
+    setIsAuthenticated(false);
+  };
+
+  // Debounce function for search
+  const debounce = (func, wait) => {
+    let timeout;
+    return (...args) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func(...args), wait);
+    };
+  };
+
+  // Stock search function
+  const searchStocks = async (query) => {
+    if (!query || !query.trim()) {
+      setSearchResults([]);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const API_ENDPOINT = 'http://localhost:8000/api/stock/';
+      const response = await fetch(`${API_ENDPOINT}?symbol=${encodeURIComponent(query.trim())}`);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("API Response:", data);
+      if (data?.overview && data?.balanceSheet && data?.cashFlow) {
+        setSelectedStock({
+          overview: data.overview,
+          balanceSheet: data.balanceSheet,
+          cashFlow: data.cashFlow
+        });
+      } else {
+        console.warn("API response does not contain expected fields.");
+        setSelectedStock(null);
+      }
+    } catch (error) {
+      console.error('Error fetching stocks:', error);
+      setSearchResults([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Debounced search function
+  const debouncedSearch = debounce(searchStocks, 300);
+
+  const handleSearchChange = (e) => {
+    const newQuery = e.target.value;
+    setSearchQuery(newQuery);
+    debouncedSearch(newQuery);
+  };
+
+  const clearSearch = () => {
+    setSearchQuery('');
+    setSearchResults([]);
+  };
+
+  const handleStockSelect = (stock) => {
+    setSelectedStock(stock);
+    clearSearch();
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, login, logout, isAuthenticated }}>
+      <StockContext.Provider 
+        value={{
+          searchQuery,
+          searchResults,
+          isLoading,
+          handleSearchChange,
+          clearSearch,
+          selectedStock,
+          setSelectedStock
+        }}
+      >
+        <MarketContext.Provider
+          value={{
+            niftyData,
+            marketLoading,
+            marketError
+          }}
+        >
+          {children}
+        </MarketContext.Provider>
+      </StockContext.Provider>
+    </AuthContext.Provider>
+  );
+};
+
+// Custom hooks for using context
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AppProvider');
+  }
+  return context;
+};
+
+export const useStock = () => {
+  const context = useContext(StockContext);
+  if (!context) {
+    throw new Error('useStock must be used within an AppProvider');
+  }
+  return context;
+};
+
+export const useMarket = () => {
+  const context = useContext(MarketContext);
+  if (!context) {
+    throw new Error('useMarket must be used within an AppProvider');
+  }
+  return context;
+};
