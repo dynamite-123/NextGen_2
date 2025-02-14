@@ -2,18 +2,6 @@ import React from 'react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 
-// const ParentComponent = () => {
-//   const handleFormSubmit = (data) => {
-//     console.log("Received Data:", data);
-//   };
-
-//   return (
-//     <div className="bg-gray-700 p-6 rounded-lg">
-//       <h2 className="text-xl font-bold mb-4">Investment Details</h2>
-//       <InvestmentForm onSubmit={handleFormSubmit} />
-//     </div>        
-//   );
-// };
 
 import { useState } from "react";
 import InvestmentForm from "./InvestmentForm";
