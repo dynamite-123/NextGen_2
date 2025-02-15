@@ -210,37 +210,3 @@ class UserListView(generics.ListAPIView):
             return Response(
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-
-
-# @api_view(['GET'])
-# @permission_classes([AllowAny])
-# def get_user_by_id(request, pk):
-#     User = get_user_model()
-#     user = get_object_or_404(User, id=id)
-#     serializer = UserSerializer(user)
-#     return Response(serializer.data)
-
-# class UserUpdateView(generics.UpdateAPIView):
-#     queryset = User.objects.all()
-#     permission_classes = (IsAuthenticated,)
-#     serializer_class = UserUpdateSerializer
-
-#     def get_object(self):
-#         return self.request.user
-
-
-# class UserDeleteView(APIView):
-#     permission_classes = (IsAuthenticated,)
-
-#     def delete(self, request):
-#         user = request.user
-#         try:
-#             user.delete()
-#             return Response(
-#                 {"message": "User deleted successfully"},
-#                 status=status.HTTP_204_NO_CONTENT,
-#             )
-#         except ObjectDoesNotExist:
-#             return Response(
-#                 {"error": "User not found"}, status=status.HTTP_404_NOT_FOUND
-#             )
