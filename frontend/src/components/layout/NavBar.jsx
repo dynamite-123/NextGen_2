@@ -11,7 +11,7 @@ const Navbar = () => {
     setLocalSearchQuery(e.target.value); // Only update the local input value
   };
   
-  useEffect(() => {
+   useEffect(() => {
     if (!isAuthenticated) {
       setLocalSearchQuery('');
       // Only clear search if there are results or a query

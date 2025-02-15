@@ -135,54 +135,63 @@ export const AppProvider = ({ children }) => {
   };
 
   // Stock search function
-  const searchStocks = async (query) => {
-    if (!query || !query.trim()) {
-      setSearchResults([]);
-      return;
-    }
+const searchStocks = async (query) => {
+  if (!query?.trim()) {
+    setSearchResults([]);
+    return;
+  }
 
-    if (!isAuthenticated) {
-      // Return early and let the component handle the redirect
-      return false;
-    }
+  if (!isAuthenticated) {
+    return false;
+  }
+
+  try {
     setIsLoading(true);
-    try {
-      const API_ENDPOINT = 'http://localhost:8000/api/stock/';
-      const response = await fetch(`${API_ENDPOINT}?symbol=${encodeURIComponent(query.trim())}`);
+    const API_ENDPOINT = 'http://localhost:8000/api/stock/';
+    const response = await fetch(`${API_ENDPOINT}?symbol=${encodeURIComponent(query.trim())}`);
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log("API Response:", data);
-      if (data?.overview && data?.balanceSheet && data?.cashFlow) {
-        setSelectedStock({
-          overview: data.overview,
-          balanceSheet: data.balanceSheet,
-          cashFlow: data.cashFlow
-        });
-      } else {
-        console.warn("API response does not contain expected fields.");
-        setSelectedStock(null);
-      }
-    } catch (error) {
-      console.error('Error fetching stocks:', error);
-      setSearchResults([]);
-    } finally {
-      setIsLoading(false);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
-  };
 
-  // Debounced search function
-  const debouncedSearch = debounce(searchStocks, 300);
+    const data = await response.json();
+    console.log("API Response:", data);
+    
+    if (data?.overview && data?.balanceSheet && data?.cashFlow) {
+      setSelectedStock({
+        overview: data.overview,
+        balanceSheet: data.balanceSheet,
+        cashFlow: data.cashFlow
+      });
+      setSearchResults([data]); // Update search results with the full data
+    } else {
+      console.warn("API response does not contain expected fields.");
+      setSelectedStock(null);
+      setSearchResults([]);
+    }
+  } catch (error) {
+    console.error('Error fetching stocks:', error);
+    setSearchResults([]);
+    setSelectedStock(null);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
-  const handleSearchChange = useCallback(async (e) => {
-    const query = e.target.value;
-    setSearchQuery(query);
-    debouncedSearch(query);
-    // ... rest of search logic
-  }, []);
+// Debounced search function
+const debouncedSearch = debounce(searchStocks, 300);
+
+const handleSearchChange = useCallback((e) => {
+  const query = e.target.value;
+  setSearchQuery(query);
+  
+  if (!query.trim()) {
+    clearSearch();
+    return;
+  }
+
+  debouncedSearch(query);
+}, [clearSearch, debouncedSearch]);
 
 
   const handleStockSelect = (stock) => {

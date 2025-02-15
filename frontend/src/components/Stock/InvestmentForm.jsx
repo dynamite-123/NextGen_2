@@ -144,19 +144,21 @@ const InvestmentForm = ({ onSubmit }) => {
           </button>
         </form>
       </div>
-      
+      {console.log(apiData)}
       {isAuthenticated && apiData && (
         <div className="mt-8 w-full max-w-6xl mx-auto border-t border-gray-700 pt-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {apiData.stocks.slice(0, 6).map((stock, index) => (
+            {apiData.slice(0, 6).map((stock, index) => (
               <div key={index} className="p-4 bg-gray-800 rounded-2xl shadow-xl border border-gray-600">
                 <h3 className="font-bold text-xl text-blue-400">{stock.company_name} ({stock.stock_symbol})</h3>
-                <p className="text-gray-300 mt-2 text-base leading-relaxed">{stock.reason}</p>
-                <p className="text-gray-400 mt-2 text-sm font-semibold"><span className="text-white">Market Cap:</span> {stock.market_cap_category}</p>
+                <p className="text-gray-300 mt-2 text-base leading-relaxed">{stock.reason_for_recommendation}</p>
+                <p className="text-gray-400 mt-2 text-sm font-semibold"><span className="text-white">Market Cap:</span> {stock.current_market_cap_category}</p>
                 <p className="text-gray-400 text-sm font-semibold"><span className="text-white">Sector:</span> {stock.primary_sector}</p>
               </div>
             ))}
-            <p className="text-gray-500 text-base mt-4 text-center italic col-span-full">{apiData.disclaimer}</p>
+            <p className="text-gray-500 text-base mt-4 text-center italic col-span-full"> Disclaimer: The stock market data provided is for informational purposes only. 
+  We do not guarantee the accuracy, completeness, or reliability of the information. 
+  Please conduct your own research before making any investment decisions.</p>
           </div>
         </div>
       )}
