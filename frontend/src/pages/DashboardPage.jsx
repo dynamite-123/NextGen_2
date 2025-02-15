@@ -8,6 +8,7 @@ import BalanceSheet from '../components/Stock/BalanceSheet';
 import CashFlows from '../components/Stock/CashFlow';
 import MarketOverview from '../components/market/marketOverview';
 import StockAnalysis from '../components/Stock/StockAnalysis';
+import StockNews from '../components/Stock/StockNews';
 
 const Dashboard = () => {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -40,6 +41,7 @@ const Dashboard = () => {
           {selectedStock ? (
             <>
               <StockOverview stock={selectedStock} />
+              <StockNews symbol={selectedStock.symbol}/>
               <StockChart stock={selectedStock} />
               <BalanceSheet stock={selectedStock} />
               <CashFlows stock={selectedStock} />

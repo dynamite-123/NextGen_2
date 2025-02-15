@@ -1,7 +1,30 @@
-import {motion} from "framer-motion";
+import { motion } from "framer-motion";
 import { useNavigate } from "react-router";
+import { useState } from "react";
+import LoginPopup from "../components/LoginPopup";
+import { LineChart, TrendingUp, Shield, BookOpen } from 'lucide-react';
+
 const LandingPage = () => {
   const navigate = useNavigate();
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [isRegisterMode, setIsRegisterMode] = useState(false);
+
+  const handleLearnMore = () => {
+    document.getElementById('features').scrollIntoView({ 
+      behavior: 'smooth',
+      block: 'start'
+    });
+  };
+
+  const handleSignUp = () => {
+    setIsRegisterMode(true);
+    setShowLoginModal(true);
+  };
+
+  const handleAuthSuccess = (userData) => {
+    navigate('/dashboard');
+  };
+
   return (
     <div className={`min-h-screen bg-gradient-to-r from-black to-blue-900 text-gray-100 flex flex-col justify-between overflow-auto`}>
       {/* Navbar */}
@@ -9,7 +32,14 @@ const LandingPage = () => {
         <h1 className="text-2xl font-bold text-white">SmartStock</h1>
         <ul className="flex items-center space-x-6">
           <li><a href="#features" className="hover:text-blue-300">Features</a></li>
-          <li><button className="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition">Sign Up </button></li>
+          <li>
+            <button 
+              onClick={handleSignUp}
+              className="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition"
+            >
+              Sign Up
+            </button>
+          </li>
         </ul>
       </nav>
       
@@ -17,107 +47,139 @@ const LandingPage = () => {
         {/* Hero and Picture Section */}
         <section className="flex flex-col md:flex-row items-center justify-center text-center md:text-left space-y-8 md:space-y-0 md:space-x-16 max-w-6xl">
           <motion.div className="max-w-lg"
-          initial={{ opacity: 0, x: 50 }} // Starts invisible and slightly to the right
-          animate={{ opacity: 1, x: 0 }} // Moves to its position smoothly
-          transition={{ duration: 1, ease: "easeOut" }} // Smooth transition
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 1, ease: "easeOut" }}
           >
             <h2 className="text-5xl font-bold text-white">Smart Stock Analysis & Recommendations</h2>
             <p className="mt-6 text-lg text-gray-300">Make informed investment decisions with real-time market data, advanced analytics, and smart recommendations.</p>
             <div className="mt-6 flex justify-center gap-4">
-              <button onClick = {() => navigate('/dashboard')}className="px-6 py-3 bg-blue-600 text-white rounded-full font-semibold shadow-md hover:bg-blue-700">Get Started</button>
-              <button className="px-6 py-3 bg-gray-800 text-white rounded-full font-semibold shadow-md hover:bg-gray-700">Learn More</button>
+              <button 
+                onClick={() => {
+                  navigate('/dashboard');
+                  setIsRegisterMode(false);
+                  setShowLoginModal(true);
+
+                }}
+                className="px-6 py-3 bg-blue-600 text-white rounded-full font-semibold shadow-md hover:bg-blue-700"
+              >
+                Get Started
+              </button>
+              <button 
+                onClick={handleLearnMore}
+                className="px-6 py-3 bg-gray-800 text-white rounded-full font-semibold shadow-md hover:bg-gray-700"
+              >
+                Learn More
+              </button>
             </div>
           </motion.div>
-          <motion.div className="max-w-lg" 
-          initial={{ opacity: 0, x: 50 }} // Starts invisible and slightly to the right
-          animate={{ opacity: 1, x: 0 }} // Moves to its position smoothly
-          transition={{ duration: 1, ease: "easeOut" }} // Smooth transition
+          
+          <motion.div
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+            className="w-full max-w-md"
           >
-            <img src="/landingShot.png" alt="Stock Analysis" className="rounded-lg shadow-md w-full" />
+            <img
+              src="/landingShot.png"
+              alt="Stock Analysis Dashboard"
+              className="w-full h-auto rounded-lg shadow-2xl"
+            />
           </motion.div>
         </section>
-        
-        {/* Features Section (Large Single Component) */}
-        <motion.section
-      id="features"
-      className="max-w-6xl p-12 bg-blue-950 shadow-lg rounded-lg text-center"
-      initial={{ opacity: 0, y: 50 }} // Start hidden and move up
-      animate={{ opacity: 1, y: 0 }} // Fade in and slide up
-      transition={{ duration: 0.8, ease: "easeOut" }} // Smooth transition
-    >
-      <h3 className="text-4xl font-bold mb-8">Why Choose Smart Stock</h3>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <motion.div
-          className="p-8 bg-blue-900 shadow-lg rounded-lg"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          viewport={{ once: true }}
-        >
-          <h4 className="text-2xl font-semibold">Real-Time Analytics</h4>
-          <p className="mt-2 text-gray-300">
-            Get instant access to market trends and real-time stock data analysis.
-          </p>
-        </motion.div>
-        <motion.div
-          className="p-8 bg-blue-900 shadow-lg rounded-lg"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          viewport={{ once: true }}
-        >
-          <h4 className="text-2xl font-semibold">Smart Search</h4>
-          <p className="mt-2 text-gray-300">
-            Find stocks easily with our intelligent search and filtering system.
-          </p>
-        </motion.div>
-        <motion.div
-          className="p-8 bg-blue-900 shadow-lg rounded-lg"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.6 }}
-          viewport={{ once: true }}
-        >
-          <h4 className="text-2xl font-semibold">Custom Alerts</h4>
-          <p className="mt-2 text-gray-300">
-            Stay updated with personalized notifications on your watched stocks.
-          </p>
-        </motion.div>
-      </div>
-    </motion.section>
+
+        {/* Features Section */}
+        <section id="features" className="py-16 w-full max-w-6xl">
+          <h3 className="text-3xl font-bold mb-12">Why Choose SmartStock?</h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {/* Real-time Analysis */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="bg-blue-800 bg-opacity-50 p-6 rounded-lg"
+            >
+              <LineChart className="w-12 h-12 text-blue-400 mb-4" />
+              <h4 className="text-xl font-semibold mb-2">Real-time Analysis</h4>
+              <p className="text-gray-300">Get instant insights with our real-time market analysis and tracking tools.</p>
+            </motion.div>
+
+            {/* Smart Recommendations */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="bg-blue-800 bg-opacity-50 p-6 rounded-lg"
+            >
+              <TrendingUp className="w-12 h-12 text-blue-400 mb-4" />
+              <h4 className="text-xl font-semibold mb-2">Smart Recommendations</h4>
+              <p className="text-gray-300">Receive personalized stock recommendations based on your preferences.</p>
+            </motion.div>
+
+            {/* Secure Platform */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="bg-blue-800 bg-opacity-50 p-6 rounded-lg"
+            >
+              <Shield className="w-12 h-12 text-blue-400 mb-4" />
+              <h4 className="text-xl font-semibold mb-2">Secure Platform</h4>
+              <p className="text-gray-300">Your data is protected with enterprise-grade security measures.</p>
+            </motion.div>
+
+            {/* Educational Resources */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="bg-blue-800 bg-opacity-50 p-6 rounded-lg"
+            >
+              <BookOpen className="w-12 h-12 text-blue-400 mb-4" />
+              <h4 className="text-xl font-semibold mb-2">Educational Resources</h4>
+              <p className="text-gray-300">Learn and grow with our comprehensive educational materials.</p>
+            </motion.div>
+          </div>
+        </section>
 
         {/* Stats Section */}
-        <motion.section className="container mx-auto px-4 py-16"
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-        
-        >
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
-            <div>
-              <h4 className="text-4xl font-bold text-blue-500 mb-2">10K+</h4>
-              <p className="text-gray-400">Active Users</p>
-            </div>
-            <div>
-              <h4 className="text-4xl font-bold text-blue-500 mb-2">5000+</h4>
-              <p className="text-gray-400">Stocks Tracked</p>
-            </div>
-            <div>
-              <h4 className="text-4xl font-bold text-blue-500 mb-2">98%</h4>
-              <p className="text-gray-400">Accuracy Rate</p>
-            </div>
-            <div>
-              <h4 className="text-4xl font-bold text-blue-500 mb-2">24/7</h4>
-              <p className="text-gray-400">Market Monitoring</p>
-            </div>
-          </div>
-        </motion.section>
+        <section className="w-full max-w-6xl py-16 bg-blue-800 bg-opacity-20 rounded-xl">
+        <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12 lg:gap-16">
+  {[
+    { value: "10K+", label: "Active Users" },
+    { value: "95%", label: "Accuracy Rate", delay: 0.1 },
+    { value: "2500+", label: "Stocks Tracked", delay: 0.1 },
+    { value: "24/7", label: "Market Monitoring", delay: 0.2 }
+  ].map(({ value, label, delay = 0 }) => (
+    <motion.div 
+      key={value} 
+      initial={{ opacity: 0 }} 
+      whileInView={{ opacity: 1 }} 
+      transition={{ duration: 0.5, delay }} 
+      className="text-center min-w-[120px]"
+    >
+      <h4 className="text-4xl font-bold text-blue-400">{value}</h4>
+      <p className="text-gray-300 mt-2">{label}</p>
+    </motion.div>
+  ))}
+</div>
+
+        </section>
       </main>
       
       {/* Footer */}
       <footer className="text-center py-4 bg-black text-gray-300">
         <p>&copy; 2025 Smart Stock. All rights reserved.</p>
       </footer>
+
+      {/* Login/Signup Modal */}
+      <LoginPopup
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onAuthSuccess={handleAuthSuccess}
+        defaultIsRegister={isRegisterMode}
+      />
     </div>
   );
 }

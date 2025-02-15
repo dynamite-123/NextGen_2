@@ -65,7 +65,6 @@ const SettingsPage = () => {
 
     try {
       // Get user ID from localStorage if not available in context
-      console.log("to be deleted user : ",user);
       const userData = user.user || JSON.parse(localStorage.getItem('userData'));
       const userId = userData?.id || '4'; // Fallback to '4' if no ID found
 

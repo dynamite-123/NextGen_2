@@ -2,14 +2,54 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth, useStock } from '../../context/AppContext';
 
+const DialogModal = ({ isOpen, onClose, title, message, primaryAction, primaryLabel, secondaryLabel = "Cancel" }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          {title}
+        </h3>
+        <p className="text-gray-600 mb-4">
+          {message}
+        </p>
+        <div className="flex justify-end space-x-3">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 rounded text-gray-600 hover:bg-gray-100 transition-colors"
+          >
+            {secondaryLabel}
+          </button>
+          <button
+            onClick={primaryAction}
+            className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+          >
+            {primaryLabel}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const Navbar = () => {
   const { searchQuery, searchResults, isLoading, handleSearchChange, clearSearch, setSelectedStock } = useStock();
   const { isAuthenticated, logout } = useAuth();
   const [localSearchQuery, setLocalSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
+  const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
+  const [isLoginPromptOpen, setIsLoginPromptOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [selectedSymbol, setSelectedSymbol] = useState(null);
   const navigate = useNavigate();
 
-  // Function to fetch suggestions from Python API
+  const clearSearchState = () => {
+    setLocalSearchQuery('');
+    setSuggestions([]);
+    clearSearch();
+  };
+
   const fetchSuggestions = async (query) => {
     if (query.trim().length === 0) {
       setSuggestions([]);
@@ -20,14 +60,13 @@ const Navbar = () => {
       const response = await fetch(`http://127.0.0.1:8000/api/stock-suggestions/?symbol=${encodeURIComponent(query)}`);
       if (!response.ok) throw new Error('Failed to fetch suggestions');
       const data = await response.json();
-      setSuggestions(data.slice(0, 4)); // Limit to 4 suggestions
+      setSuggestions(data.slice(0, 4));
     } catch (error) {
       console.error('Error fetching suggestions:', error);
       setSuggestions([]);
     }
   };
 
-  // Debounce function to limit API calls
   const debounce = (func, wait) => {
     let timeout;
     return (...args) => {
@@ -36,7 +75,6 @@ const Navbar = () => {
     };
   };
 
-  // Create debounced version of fetchSuggestions
   const debouncedFetchSuggestions = debounce(fetchSuggestions, 300);
 
   const handleSearchChangeInput = (e) => {
@@ -47,24 +85,70 @@ const Navbar = () => {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      setLocalSearchQuery('');
-      setSuggestions([]);
-      if (searchResults.length > 0 || searchQuery) {
-        clearSearch();
-      }
+      clearSearchState();
     }
-  }, [isAuthenticated, clearSearch, searchResults.length, searchQuery]);
+  }, [isAuthenticated]);
 
   const handleKeyDown = async (e) => {
     if (e.key === "Enter" && localSearchQuery.trim()) {
       if (!isAuthenticated) {
-        navigate('/login', { 
-          state: { from: location.pathname }
-        });
+        setSelectedSymbol(localSearchQuery);
+        setIsLoginPromptOpen(true);
         return;
       }
       handleSearchChange(e);
-      setSuggestions([]); // Clear suggestions after Enter
+      
+      setSuggestions([]);
+    }
+  };
+
+  const handleSymbolSelect = (symbol) => {
+    if (!isAuthenticated) {
+      setSelectedSymbol(symbol);
+      setIsLoginPromptOpen(true);
+      return;
+    }
+    setLocalSearchQuery(symbol);
+    setSuggestions([]);
+    handleSearchChange({ target: { value: symbol } });
+  };
+
+  const handleStockSelect = (stock) => {
+    if (!isAuthenticated) {
+      setSelectedSymbol(stock.symbol);
+      setIsLoginPromptOpen(true);
+      return;
+    }
+    setSelectedStock(stock);
+    clearSearch();
+  };
+
+  const handleLoginPromptConfirm = () => {
+    setIsLoginPromptOpen(false);
+    clearSearchState();
+    navigate('/login', { 
+      state: { 
+        from: location.pathname,
+        searchQuery: selectedSymbol 
+      }
+    });
+  };
+
+  const handleLogoutClick = () => {
+    setIsLogoutDialogOpen(true);
+  };
+
+  const handleLogoutConfirm = async () => {
+    setIsLoggingOut(true);
+    try {
+      await logout();
+      clearSearchState();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setIsLoggingOut(false);
+      setIsLogoutDialogOpen(false);
     }
   };
 
@@ -95,12 +179,7 @@ const Navbar = () => {
                     <div
                       key={symbol}
                       className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-gray-900"
-                      onClick={() => {
-                        setLocalSearchQuery(symbol);
-                        setSuggestions([]);
-                        // Trigger search with selected suggestion
-                        handleSearchChange({ target: { value: symbol } });
-                      }}
+                      onClick={() => handleSymbolSelect(symbol)}
                     >
                       {symbol}
                     </div>
@@ -114,10 +193,7 @@ const Navbar = () => {
                     <div
                       key={stock.symbol}
                       className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-gray-900"
-                      onClick={() => {
-                        setSelectedStock(stock);
-                        clearSearch();
-                      }}
+                      onClick={() => handleStockSelect(stock)}
                     >
                       <div className="font-medium">{stock.symbol}</div>
                       <div className="text-sm text-gray-600">{stock.overview.longName}</div>
@@ -134,10 +210,11 @@ const Navbar = () => {
             <Link to="/settings" className="hover:text-blue-400">Settings</Link>
             {isAuthenticated ? (
               <button
-                onClick={logout}
-                className="bg-red-600 px-4 py-2 rounded hover:bg-red-700 transition-colors"
+                onClick={handleLogoutClick}
+                disabled={isLoggingOut}
+                className="bg-red-600 px-4 py-2 rounded hover:bg-red-700 transition-colors disabled:opacity-50"
               >
-                Logout
+                {isLoggingOut ? "Logging out..." : "Logout"}
               </button>
             ) : (
               <Link
@@ -150,6 +227,29 @@ const Navbar = () => {
           </div>
         </div>
       </nav>
+
+      <DialogModal
+        isOpen={isLogoutDialogOpen}
+        onClose={() => setIsLogoutDialogOpen(false)}
+        title="Confirm Logout"
+        message="Are you sure you want to log out? You'll need to sign in again to access your account."
+        primaryAction={handleLogoutConfirm}
+        primaryLabel={isLoggingOut ? "Logging out..." : "Logout"}
+        secondaryLabel="Cancel"
+      />
+
+      <DialogModal
+        isOpen={isLoginPromptOpen}
+        onClose={() => {
+          setIsLoginPromptOpen(false);
+          clearSearchState();
+        }}
+        title="Login Required"
+        message="Please log in to view detailed stock information and add stocks to your watchlist."
+        primaryAction={handleLoginPromptConfirm}
+        primaryLabel="Log In"
+        secondaryLabel="Cancel"
+      />
     </div>
   );
 };
