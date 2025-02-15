@@ -19,7 +19,10 @@ from .serializers import (
     UserListSerializer,
     UserSerializer,
     NSECompanySerializer,
+    ChangePasswordSerializer,
 )
+from .get_news import get_all_news
+from .sentiment_analysis import FinancialSentimentAnalyzer
 
 
 class IsAdminOrSuperuser(BasePermission):
@@ -287,3 +290,34 @@ def nifty50_chart(request, *args, **kwargs):
         return Response(data, status=status.HTTP_200_OK)
     else:
         print("Failed to fetch data:", response.status_code)
+
+ 
+@api_view(["GET"])
+def sentiments_view(request, *arg, **args):
+    symbol = request.GET.get("symbol")  # Get stock symbol from query parameters
+
+    if not symbol:
+        return Response(
+            {"error": "Stock symbol is required."}, status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    news_list = get_all_news(symbol)
+
+    try:
+        analyzer = FinancialSentimentAnalyzer()
+        results = analyzer.analyze_headlines(news_list)
+        return Response(results, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+class ChangePasswordView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        serializer = ChangePasswordSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            request.user.set_password(serializer.validated_data['new_password'])
+            request.user.save()
+            return Response({"detail": "Password changed successfully"}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
