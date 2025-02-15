@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect,useCallback } from 'react';
 
 const AuthContext = createContext(null);
 const StockContext = createContext(null);
@@ -21,30 +21,36 @@ export const AppProvider = ({ children }) => {
         setIsAuthenticated(true);
       } catch (error) {
         console.error('Error parsing stored user data:', error);
-        // Clear invalid data
         localStorage.removeItem('isAuthenticated');
         localStorage.removeItem('userData');
       }
     }
   }, []);
 
-  const login = (userData) => {
+  const login = useCallback((userData) => {
     setUser(userData);
     setIsAuthenticated(true);
     localStorage.setItem('isAuthenticated', 'true');
     localStorage.setItem('userData', JSON.stringify(userData));
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
+    // Clear auth states
     setUser(null);
     setIsAuthenticated(false);
-    localStorage.removeItem('isAuthenticated');
-    localStorage.removeItem('userData');
 
+    // Clear local storage
+    localStorage.clear(); // Clear all storage instead of individual items
+
+    // Clear all search and stock related states
     setSearchQuery('');
     setSearchResults([]);
     setSelectedStock(null);
-  };
+    setIsLoading(false);
+
+    // Force a page reload to clear any remaining state
+    window.location.href = '/dashboard';
+  }, []);
 
 // ... existing code ...
 
@@ -53,13 +59,11 @@ export const AppProvider = ({ children }) => {
   const [searchResults, setSearchResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedStock, setSelectedStock] = useState(null);
-  useEffect(() => {
-    if (!isAuthenticated) {
-      setSearchQuery('');
-      setSearchResults([]);
-      setSelectedStock(null);
-    }
-  }, [isAuthenticated]);
+  const clearSearch = useCallback(() => {
+    setSearchQuery('');
+    setSearchResults([]);
+    setSelectedStock(null);
+  }, []);
 
   // Market overview state
   const [niftyData, setNiftyData] = useState([]);
@@ -80,7 +84,7 @@ export const AppProvider = ({ children }) => {
         const data = await response.json();
 
         // Validate the Yahoo Finance API response structure
-        if (!data?.chart?.result?.[0]) {
+        if (!data.chart?.result?.[0]) {
           throw new Error("Invalid API response structure: Missing chart data");
         }
 
@@ -173,21 +177,19 @@ export const AppProvider = ({ children }) => {
   // Debounced search function
   const debouncedSearch = debounce(searchStocks, 300);
 
-  const handleSearchChange = (e) => {
-    const newQuery = e.target.value;
-    setSearchQuery(newQuery);
-    debouncedSearch(newQuery);
-  };
+  const handleSearchChange = useCallback(async (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    debouncedSearch(query);
+    // ... rest of search logic
+  }, []);
 
-  const clearSearch = () => {
-    setSearchQuery('');
-    setSearchResults([]);
-  };
 
   const handleStockSelect = (stock) => {
     setSelectedStock(stock);
     clearSearch();
   };
+  
 
   return (
     <AuthContext.Provider value={{ user, login, logout, isAuthenticated,setIsAuthenticated }}>

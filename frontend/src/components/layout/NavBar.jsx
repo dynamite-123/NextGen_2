@@ -1,5 +1,5 @@
 import React, { useState,useEffect } from 'react';
-import { Link,Navigate, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth, useStock } from '../../context/AppContext';
 
 const Navbar = () => {
@@ -14,20 +14,21 @@ const Navbar = () => {
   useEffect(() => {
     if (!isAuthenticated) {
       setLocalSearchQuery('');
-      clearSearch();
+      // Only clear search if there are results or a query
+      if (searchResults.length > 0 || searchQuery) {
+        clearSearch();
+      }
     }
-  }, [isAuthenticated, clearSearch]);
-  const handleKeyDown = (e) => {
+  }, [isAuthenticated, clearSearch, searchResults.length, searchQuery]);
+
+  const handleKeyDown = async (e) => {
     if (e.key === "Enter" && localSearchQuery.trim()) {
       if (!isAuthenticated) {
-        // Redirect to login if not authenticated
         navigate('/login', { 
-          state: { from: location.pathname }  // Store the current path
+          state: { from: location.pathname }
         });
-        setLocalSearchQuery("");
         return;
       }
-      // Only make the API call if authenticated
       handleSearchChange(e);
     }
   };
