@@ -12,52 +12,43 @@ import StockAnalysis from '../components/Stock/StockAnalysis';
 const Dashboard = () => {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const { isAuthenticated } = useAuth();
-  const { selectedStock } = useStock();
+  const { selectedStock,setSelectedStock } = useStock();
 
+  // Check localStorage on component mount
   useEffect(() => {
-    if (!isAuthenticated) {
+    const storedAuth = localStorage.getItem('isAuthenticated');
+    if (storedAuth !== 'true') {
       setIsAuthOpen(true);
     }
-  }, [isAuthenticated]);
+  }, []);
 
   return (
     <>
-      <AuthModal 
-        isOpen={isAuthOpen}
-        onClose={() => {
-          if (isAuthOpen) {
+      {!isAuthenticated && (
+        <AuthModal  
+          isOpen={isAuthOpen}
+          onClose={() => setIsAuthOpen(false)}
+          onAuthSuccess={(userData) => {
+            console.log("User authenticated successfully!", userData);
             setIsAuthOpen(false);
-          }
-        }}
-      />
+          }}
+        />
+      )}
 
       <div className="container mx-auto mt-8 px-4">
         <div className="space-y-6">
-          {isAuthenticated ? (
-            selectedStock ? (
-              <>
-                <StockOverview stock={selectedStock} />
-                <StockChart stock={selectedStock} />
-                <BalanceSheet stock={selectedStock} />
-                <CashFlows stock={selectedStock} />
-              </>
-            ) : (
-              <>
-                <MarketOverview />
-                <StockAnalysis />
-              </>
-            )
+          {selectedStock ? (
+            <>
+              <StockOverview stock={selectedStock} />
+              <StockChart stock={selectedStock} />
+              <BalanceSheet stock={selectedStock} />
+              <CashFlows stock={selectedStock} />
+            </>
           ) : (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="container mx-auto mt-8 px-4"
-            >
-              <>
-                <MarketOverview />
-                <StockAnalysis />
-              </>
-            </motion.div>
+            <>
+              <MarketOverview />
+              <StockAnalysis />
+            </>
           )}
         </div>
       </div>

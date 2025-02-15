@@ -1,5 +1,6 @@
-import { useState } from "react";
-
+import { useState,useEffect } from "react";
+import { useNavigate,useLocation } from "react-router";
+import { useAuth } from "../../context/AppContext";
 const InvestmentForm = ({ onSubmit }) => {
   const [formData, setFormData] = useState({
     amount: "",
@@ -8,9 +9,27 @@ const InvestmentForm = ({ onSubmit }) => {
     riskTolerance: "low",
     sector: "automobile",
   });
-  
+
+  const navigate = useNavigate();
+  const location = useLocation();
+  const {isAuthenticated} = useAuth();
   const [apiData, setApiData] = useState(null);
 
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      // Clear the API response data
+      setApiData(null);
+      // Reset form to initial state
+      setFormData({
+        amount: "",
+        time: "",
+        marketType: "small",
+        riskTolerance: "low",
+        sector: "automobile",
+      });
+    }
+  }, [isAuthenticated]);
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (name === "amount" && (value < 1 || value > 100000000)) return;
@@ -20,6 +39,15 @@ const InvestmentForm = ({ onSubmit }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!isAuthenticated) {
+
+      navigate('/login', { 
+        state: { from: location.pathname }
+      });
+      return;
+    }
+
     const requestData = {
       investment_amount: parseInt(formData.amount),
       investment_duration: parseInt(formData.time),
@@ -117,7 +145,7 @@ const InvestmentForm = ({ onSubmit }) => {
         </form>
       </div>
       
-      {apiData && (
+      {isAuthenticated && apiData && (
         <div className="mt-8 w-full max-w-6xl mx-auto border-t border-gray-700 pt-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {apiData.stocks.slice(0, 6).map((stock, index) => (

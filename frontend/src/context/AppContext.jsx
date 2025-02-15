@@ -9,11 +9,57 @@ export const AppProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
+  // Check authentication status on initial load
+  useEffect(() => {
+    const storedAuth = localStorage.getItem('isAuthenticated');
+    const storedUser = localStorage.getItem('userData');
+    
+    if (storedAuth === 'true' && storedUser) {
+      try {
+        const userData = JSON.parse(storedUser);
+        setUser(userData);
+        setIsAuthenticated(true);
+      } catch (error) {
+        console.error('Error parsing stored user data:', error);
+        // Clear invalid data
+        localStorage.removeItem('isAuthenticated');
+        localStorage.removeItem('userData');
+      }
+    }
+  }, []);
+
+  const login = (userData) => {
+    setUser(userData);
+    setIsAuthenticated(true);
+    localStorage.setItem('isAuthenticated', 'true');
+    localStorage.setItem('userData', JSON.stringify(userData));
+  };
+
+  const logout = () => {
+    setUser(null);
+    setIsAuthenticated(false);
+    localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('userData');
+
+    setSearchQuery('');
+    setSearchResults([]);
+    setSelectedStock(null);
+  };
+
+// ... existing code ...
+
   // Stock search state
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedStock, setSelectedStock] = useState(null);
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setSearchQuery('');
+      setSearchResults([]);
+      setSelectedStock(null);
+    }
+  }, [isAuthenticated]);
 
   // Market overview state
   const [niftyData, setNiftyData] = useState([]);
@@ -73,15 +119,7 @@ export const AppProvider = ({ children }) => {
     return () => clearInterval(interval);
   }, []);
 
-  const login = (userData) => {
-    setUser(userData);
-    setIsAuthenticated(true);
-  };
-
-  const logout = () => {
-    setUser(null);
-    setIsAuthenticated(false);
-  };
+  
 
   // Debounce function for search
   const debounce = (func, wait) => {
@@ -99,6 +137,10 @@ export const AppProvider = ({ children }) => {
       return;
     }
 
+    if (!isAuthenticated) {
+      // Return early and let the component handle the redirect
+      return false;
+    }
     setIsLoading(true);
     try {
       const API_ENDPOINT = 'http://localhost:8000/api/stock/';
@@ -148,7 +190,7 @@ export const AppProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated }}>
+    <AuthContext.Provider value={{ user, login, logout, isAuthenticated,setIsAuthenticated }}>
       <StockContext.Provider 
         value={{
           searchQuery,

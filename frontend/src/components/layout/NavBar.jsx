@@ -1,19 +1,34 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState,useEffect } from 'react';
+import { Link,Navigate, useNavigate } from 'react-router-dom';
 import { useAuth, useStock } from '../../context/AppContext';
 
 const Navbar = () => {
   const { searchQuery, searchResults, isLoading, handleSearchChange, clearSearch, setSelectedStock } = useStock();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated,logout } = useAuth();
   const [localSearchQuery, setLocalSearchQuery] = useState(""); // Local input state
-
+  const navigate = useNavigate();
   const handleSearchChangeInput = (e) => {
     setLocalSearchQuery(e.target.value); // Only update the local input value
   };
-
+  
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setLocalSearchQuery('');
+      clearSearch();
+    }
+  }, [isAuthenticated, clearSearch]);
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && localSearchQuery.trim()) {
-      handleSearchChange(e); // Trigger the search logic
+      if (!isAuthenticated) {
+        // Redirect to login if not authenticated
+        navigate('/login', { 
+          state: { from: location.pathname }  // Store the current path
+        });
+        setLocalSearchQuery("");
+        return;
+      }
+      // Only make the API call if authenticated
+      handleSearchChange(e);
     }
   };
 
@@ -64,7 +79,14 @@ const Navbar = () => {
             <Link to="/portfolio" className="hover:text-blue-400">Portfolio</Link>
             <Link to="/settings" className="hover:text-blue-400">Settings</Link>
 
-            {!isAuthenticated && (
+            {isAuthenticated ? (
+              <button
+                onClick={logout}
+                className="bg-red-600 px-4 py-2 rounded hover:bg-red-700 transition-colors"
+              >
+                Logout
+              </button>
+            ) : (
               <Link
                 to="/login"
                 className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700"
@@ -80,3 +102,4 @@ const Navbar = () => {
 };
 
 export default Navbar;
+
