@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import status, generics
 from rest_framework.permissions import AllowAny, IsAuthenticated, BasePermission
-from .utils import get_stock_data
+from .utils import get_stock_data, get_nse_top_gainers, get_nse_top_losers
 from .stock_recommender import get_stock_recommendations_json
 import logging
 from .models import User
@@ -210,3 +210,22 @@ class UserListView(generics.ListAPIView):
             return Response(
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+@api_view(["GET"])
+def gainers_and_losers(*args, **kwargs):
+
+    try:
+        data = {}
+        data['top_gainers'] = get_nse_top_gainers()
+        data['top_losers'] = get_nse_top_losers()
+
+        if not data:
+            return Response(
+                {"error": "No data found for this stock."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        return Response(data, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
