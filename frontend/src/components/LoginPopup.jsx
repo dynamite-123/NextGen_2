@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import axios from 'axios';
+import{useAuth} from "../context/AppContext";
 const AuthModal = ({ isOpen, onClose, onAuthSuccess }) => {
   const [isRegister, setIsRegister] = useState(false);
+  const {login} =useAuth();
   const [formData, setFormData] = useState({
     username: '',
     phone_number: '',
@@ -35,11 +37,11 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }) => {
           "Content-Type": "application/json",
         },
       });
-      console.log("Full Response:", response); // Log full response
-      console.log("Response Data:", response.data);
-      if (response.status !== 200) {
-        throw new Error(response.data.message || "Authentication failed");
+
+      if (response.status !== 200 && response.status !== 201) {
+        throw new Error(response.data?.message || "Authentication failed");
       }
+      
       
       const data =  response.data;
       
@@ -52,8 +54,11 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }) => {
         .catch(error => console.error("Error:", error));
       }
       
+      console.log(data);
       // Call the success callback if provided
       if (onAuthSuccess) {
+        console.log("before  it goes to login function : ",data);
+        login(data);
         onAuthSuccess(data);
       }
       
