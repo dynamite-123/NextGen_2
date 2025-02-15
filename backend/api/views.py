@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import status, generics
 from rest_framework.permissions import AllowAny, IsAuthenticated, BasePermission
-from .utils import get_stock_data
+from .utils import get_stock_data, get_nse_top_gainers, get_nse_top_losers
 from .stock_recommender import get_stock_recommendations_json
 import logging
 from .models import User
@@ -211,36 +211,21 @@ class UserListView(generics.ListAPIView):
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
+@api_view(["GET"])
+def gainers_and_losers(*args, **kwargs):
 
-# @api_view(['GET'])
-# @permission_classes([AllowAny])
-# def get_user_by_id(request, pk):
-#     User = get_user_model()
-#     user = get_object_or_404(User, id=id)
-#     serializer = UserSerializer(user)
-#     return Response(serializer.data)
+    try:
+        data = {}
+        data['top_gainers'] = get_nse_top_gainers()
+        data['top_losers'] = get_nse_top_losers()
 
-# class UserUpdateView(generics.UpdateAPIView):
-#     queryset = User.objects.all()
-#     permission_classes = (IsAuthenticated,)
-#     serializer_class = UserUpdateSerializer
+        if not data:
+            return Response(
+                {"error": "No data found for this stock."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
-#     def get_object(self):
-#         return self.request.user
+        return Response(data, status=status.HTTP_200_OK)
 
-
-# class UserDeleteView(APIView):
-#     permission_classes = (IsAuthenticated,)
-
-#     def delete(self, request):
-#         user = request.user
-#         try:
-#             user.delete()
-#             return Response(
-#                 {"message": "User deleted successfully"},
-#                 status=status.HTTP_204_NO_CONTENT,
-#             )
-#         except ObjectDoesNotExist:
-#             return Response(
-#                 {"error": "User not found"}, status=status.HTTP_404_NOT_FOUND
-#             )
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

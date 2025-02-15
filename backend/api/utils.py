@@ -2,6 +2,7 @@ from yahooquery import Ticker
 import json
 import pandas as pd
 import numpy as np
+import yfinance as yf
 
 
 class CustomFloatStr(float):
@@ -146,3 +147,74 @@ def get_stock_data(symbol, *args, **kwargs):
 
 
 # print(get_stock_data("RELIANCE.NS"))
+
+def get_nse_top_gainers():
+    nifty50_symbols = [
+        "RELIANCE.NS", "TCS.NS", "INFY.NS", "HDFCBANK.NS", "ICICIBANK.NS",
+        "HINDUNILVR.NS", "KOTAKBANK.NS", "SBIN.NS", "BHARTIARTL.NS", "ITC.NS",
+        "ASIANPAINT.NS", "AXISBANK.NS", "BAJFINANCE.NS", "MARUTI.NS", "HCLTECH.NS",
+        "WIPRO.NS", "SUNPHARMA.NS", "ULTRACEMCO.NS", "TITAN.NS", "LT.NS",
+        "NESTLEIND.NS", "POWERGRID.NS", "INDUSINDBK.NS", "BAJAJFINSV.NS", "HDFCLIFE.NS",
+        "DRREDDY.NS", "GRASIM.NS", "JSWSTEEL.NS", "CIPLA.NS", "ADANIPORTS.NS",
+        "COALINDIA.NS", "TATAMOTORS.NS", "BPCL.NS", "ONGC.NS", "HEROMOTOCO.NS",
+        "EICHERMOT.NS", "DIVISLAB.NS", "APOLLOHOSP.NS", "BRITANNIA.NS", "SHREECEM.NS",
+        "TECHM.NS", "BAJAJ-AUTO.NS", "M&M.NS", "ADANIENT.NS", "NTPC.NS",
+        "UPL.NS", "HINDALCO.NS", "SBILIFE.NS"
+    ]
+    
+    # Fetch current day's price data
+    data = yf.download(tickers=nifty50_symbols, period="1d", interval="1d", group_by='ticker')
+    
+    gainers = []
+    for symbol in nifty50_symbols:
+        if symbol in data:
+            open_price = data[symbol]['Open'].iloc[0]
+            close_price = data[symbol]['Close'].iloc[0]
+            change_percent = ((close_price - open_price) / open_price) * 100
+            gainers.append({
+                'symbol': symbol.replace('.NS', ''),  # Remove '.NS' suffix for clarity
+                'open': round(open_price, 2),
+                'close': round(close_price, 2),
+                'change': round(change_percent, 2)
+            })
+    
+    # Sort by percentage change and get top 5 gainers
+    top_gainers = sorted(gainers, key=lambda x: x['change'], reverse=True)[:5]
+    
+    return top_gainers
+
+
+def get_nse_top_losers():
+    nifty50_symbols = [
+        "RELIANCE.NS", "TCS.NS", "INFY.NS", "HDFCBANK.NS", "ICICIBANK.NS",
+        "HINDUNILVR.NS", "KOTAKBANK.NS", "SBIN.NS", "BHARTIARTL.NS", "ITC.NS",
+        "ASIANPAINT.NS", "AXISBANK.NS", "BAJFINANCE.NS", "MARUTI.NS", "HCLTECH.NS",
+        "WIPRO.NS", "SUNPHARMA.NS", "ULTRACEMCO.NS", "TITAN.NS", "LT.NS",
+        "NESTLEIND.NS", "POWERGRID.NS", "INDUSINDBK.NS", "BAJAJFINSV.NS", "HDFCLIFE.NS",
+        "DRREDDY.NS", "GRASIM.NS", "JSWSTEEL.NS", "CIPLA.NS", "ADANIPORTS.NS",
+        "COALINDIA.NS", "TATAMOTORS.NS", "BPCL.NS", "ONGC.NS", "HEROMOTOCO.NS",
+        "EICHERMOT.NS", "DIVISLAB.NS", "APOLLOHOSP.NS", "BRITANNIA.NS", "SHREECEM.NS",
+        "TECHM.NS", "BAJAJ-AUTO.NS", "M&M.NS", "ADANIENT.NS", "NTPC.NS",
+        "UPL.NS", "HINDALCO.NS", "SBILIFE.NS"
+    ]
+    
+    # Fetch current day's price data
+    data = yf.download(tickers=nifty50_symbols, period="1d", interval="1d", group_by='ticker')
+    
+    losers = []
+    for symbol in nifty50_symbols:
+        if symbol in data:
+            open_price = data[symbol]['Open'].iloc[0]
+            close_price = data[symbol]['Close'].iloc[0]
+            change_percent = ((close_price - open_price) / open_price) * 100
+            losers.append({
+                'symbol': symbol.replace('.NS', ''),  # Remove '.NS' suffix
+                'open': round(open_price, 2),
+                'close': round(close_price, 2),
+                'change': round(change_percent, 2)
+            })
+    
+    # Sort by percentage change (lowest to highest) and get top 5 losers
+    top_losers = sorted(losers, key=lambda x: x['change'])[:5]
+    
+    return top_losers
