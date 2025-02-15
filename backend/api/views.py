@@ -1,3 +1,4 @@
+import requests
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth import authenticate, get_user_model
 from django.shortcuts import get_object_or_404
@@ -273,3 +274,16 @@ def stock_news(request):
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+@api_view(["GET"])
+def nifty50_chart(request, *args, **kwargs):
+    url = "https://query1.finance.yahoo.com/v8/finance/chart/^NSEI?interval=1d&range=1mo"
+    headers = {"User-Agent": "Mozilla/5.0"}
+
+    response = requests.get(url, headers=headers)
+
+    if response.status_code == 200:
+        data = response.json()  # Parse JSON response
+        return Response(data, status=status.HTTP_200_OK)
+    else:
+        print("Failed to fetch data:", response.status_code)

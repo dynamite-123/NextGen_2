@@ -11,7 +11,8 @@ from .views import (
     UserManageView,
     gainers_and_losers,
     stock_news,
-    NSECompanyFilterView
+    NSECompanyFilterView,
+    nifty50_chart,
 )
 
 urlpatterns = [
@@ -24,5 +25,6 @@ urlpatterns = [
     path('gainers-and-losers/', gainers_and_losers, name='gainers-and-losers'),
     path('stock-news/', stock_news, name='stock-news'),
     path('stock-suggestions/', NSECompanyFilterView.as_view(), name='stock-suggestions'),
+    path('nifty50-chart/', nifty50_chart, name='nifty50-chart'),
 ]
 

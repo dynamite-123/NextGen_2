@@ -148,7 +148,7 @@ const searchStocks = async (query) => {
   try {
     setIsLoading(true);
     const API_ENDPOINT = 'http://localhost:8000/api/stock/';
-    const response = await fetch(`${API_ENDPOINT}?symbol=${encodeURIComponent(query.trim())}`);
+    const response = await fetch(`${API_ENDPOINT}?symbol=${encodeURIComponent(query.trim())}.NS`);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);

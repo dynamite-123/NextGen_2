@@ -167,77 +167,77 @@ for token in response:
 
 
 
-'''
 
-ans = '''<think>
-Okay, let's tackle this query. The user wants 6 specific stocks from the NSE in India based on certain criteria. Let me break down the requirements first.
+# '''
+# ans = '''<think>
+# Okay, let's tackle this query. The user wants 6 specific stocks from the NSE in India based on certain criteria. Let me break down the requirements first.
 
-Investment amount is 200,000 INR over 3 years. They prefer large-cap stocks in the FMCG sector with low risk tolerance. So, I need to focus on stable, well-established companies in FMCG. Large-cap usually means companies with a market cap over 20,000 crore INR, but I should confirm the exact NSE categories.
+# Investment amount is 200,000 INR over 3 years. They prefer large-cap stocks in the FMCG sector with low risk tolerance. So, I need to focus on stable, well-established companies in FMCG. Large-cap usually means companies with a market cap over 20,000 crore INR, but I should confirm the exact NSE categories.
 
-First, list out the major FMCG companies in India. Hindustan Unilever (HINDUNILVR) is a big one. ITC Limited (ITC) is another major player. Nestle India (NESTLEIND), Dabur (DABUR), Britannia (BRITANNIA), and maybe Tata Consumer Products (TATACONSUM). These are all large-cap and in FMCG.
+# First, list out the major FMCG companies in India. Hindustan Unilever (HINDUNILVR) is a big one. ITC Limited (ITC) is another major player. Nestle India (NESTLEIND), Dabur (DABUR), Britannia (BRITANNIA), and maybe Tata Consumer Products (TATACONSUM). These are all large-cap and in FMCG.
 
-Now, check their market caps. HUL is definitely large-cap. ITC is also large. Nestle India, Dabur, Britannia, and Tata Consumer all fit into large-cap as well. 
+# Now, check their market caps. HUL is definitely large-cap. ITC is also large. Nestle India, Dabur, Britannia, and Tata Consumer all fit into large-cap as well. 
 
-Low risk tolerance means looking for companies with consistent dividends, stable earnings, and low debt. FMCG is generally defensive, which aligns with low risk. Each of these companies has a strong market presence and consistent performance.
+# Low risk tolerance means looking for companies with consistent dividends, stable earnings, and low debt. FMCG is generally defensive, which aligns with low risk. Each of these companies has a strong market presence and consistent performance.
 
-For each stock, I need to provide the symbol, company name, reason, market cap category, and sector. The reason should mention things like market leadership, consistent growth, strong distribution, brand value, etc.
+# For each stock, I need to provide the symbol, company name, reason, market cap category, and sector. The reason should mention things like market leadership, consistent growth, strong distribution, brand value, etc.
 
-Double-check the sectors. FMCG includes personal products, food, beverages. ITC has diversified into FMCG beyond tobacco, so it's acceptable. Tata Consumer is in food and beverages, so that's FMCG.
+# Double-check the sectors. FMCG includes personal products, food, beverages. ITC has diversified into FMCG beyond tobacco, so it's acceptable. Tata Consumer is in food and beverages, so that's FMCG.
 
-Make sure all symbols are correct as per NSE. HINDUNILVR, ITC, NESTLEIND, DABUR, BRITANNIA, TATACONSUM. Yes, those are correct.
+# Make sure all symbols are correct as per NSE. HINDUNILVR, ITC, NESTLEIND, DABUR, BRITANNIA, TATACONSUM. Yes, those are correct.
 
-Current market cap category: All large-cap. Primary sector: FMCG for all. 
+# Current market cap category: All large-cap. Primary sector: FMCG for all. 
 
-Reasons: For HUL, market leader with strong brands. ITC's diversified portfolio and strong rural presence. Nestle's premium products and innovation. Dabur's Ayurvedic focus. Britannia's dominance in biscuits. Tata Consumer's expansion and trusted brands.
+# Reasons: For HUL, market leader with strong brands. ITC's diversified portfolio and strong rural presence. Nestle's premium products and innovation. Dabur's Ayurvedic focus. Britannia's dominance in biscuits. Tata Consumer's expansion and trusted brands.
 
-I think that covers all six. Let me structure the JSON array as specified. Ensure no markdown, just plain JSON. Check for any errors in the structure. Each object should have the five fields. Looks good.
-</think>
+# I think that covers all six. Let me structure the JSON array as specified. Ensure no markdown, just plain JSON. Check for any errors in the structure. Each object should have the five fields. Looks good.
+# </think>
 
-```json
-[
-    {
-        "stock_symbol": "HINDUNILVR",
-        "company_name": "Hindustan Unilever Limited",
-        "reason_for_recommendation": "Market leader in FMCG with diversified product portfolio, strong brand equity, and consistent dividend payouts. Low volatility aligns with low-risk tolerance.",
-        "current_market_cap_category": "Large Cap",
-        "primary_sector": "FMCG"
-    },
-    {
-        "stock_symbol": "ITC",
-        "company_name": "ITC Limited",
-        "reason_for_recommendation": "Dominant player in FMCG with a strong presence in staples, snacks, and personal care. Diversified revenue streams and stable cash flows reduce risk.",
-        "current_market_cap_category": "Large Cap",
-        "primary_sector": "FMCG"
-    },
-    {
-        "stock_symbol": "NESTLEIND",
-        "company_name": "Nestle India Limited",
-        "reason_for_recommendation": "Strong brand reputation in packaged foods and beverages. Consistent growth, high operational efficiency, and resilient demand for essential products.",
-        "current_market_cap_category": "Large Cap",
-        "primary_sector": "FMCG"
-    },
-    {
-        "stock_symbol": "DABUR",
-        "company_name": "Dabur India Limited",
-        "reason_for_recommendation": "Leading Ayurvedic and natural FMCG brand with a wide distribution network. Stable earnings and low debt ensure lower risk.",
-        "current_market_cap_category": "Large Cap",
-        "primary_sector": "FMCG"
-    },
-    {
-        "stock_symbol": "BRITANNIA",
-        "company_name": "Britannia Industries Limited",
-        "reason_for_recommendation": "Market leader in biscuits and bakery products with strong pricing power. Consistent revenue growth and robust margins.",
-        "current_market_cap_category": "Large Cap",
-        "primary_sector": "FMCG"
-    },
-    {
-        "stock_symbol": "TATACONSUM",
-        "company_name": "Tata Consumer Products Limited",
-        "reason_for_recommendation": "Expanding FMCG footprint with trusted brands in staples, beverages, and snacks. Strategic acquisitions and stable demand support low-risk profile.",
-        "current_market_cap_category": "Large Cap",
-        "primary_sector": "FMCG"
-    }
-]
-```
-'''
+# ```json
+# [
+#     {
+#         "stock_symbol": "HINDUNILVR",
+#         "company_name": "Hindustan Unilever Limited",
+#         "reason_for_recommendation": "Market leader in FMCG with diversified product portfolio, strong brand equity, and consistent dividend payouts. Low volatility aligns with low-risk tolerance.",
+#         "current_market_cap_category": "Large Cap",
+#         "primary_sector": "FMCG"
+#     },
+#     {
+#         "stock_symbol": "ITC",
+#         "company_name": "ITC Limited",
+#         "reason_for_recommendation": "Dominant player in FMCG with a strong presence in staples, snacks, and personal care. Diversified revenue streams and stable cash flows reduce risk.",
+#         "current_market_cap_category": "Large Cap",
+#         "primary_sector": "FMCG"
+#     },
+#     {
+#         "stock_symbol": "NESTLEIND",
+#         "company_name": "Nestle India Limited",
+#         "reason_for_recommendation": "Strong brand reputation in packaged foods and beverages. Consistent growth, high operational efficiency, and resilient demand for essential products.",
+#         "current_market_cap_category": "Large Cap",
+#         "primary_sector": "FMCG"
+#     },
+#     {
+#         "stock_symbol": "DABUR",
+#         "company_name": "Dabur India Limited",
+#         "reason_for_recommendation": "Leading Ayurvedic and natural FMCG brand with a wide distribution network. Stable earnings and low debt ensure lower risk.",
+#         "current_market_cap_category": "Large Cap",
+#         "primary_sector": "FMCG"
+#     },
+#     {
+#         "stock_symbol": "BRITANNIA",
+#         "company_name": "Britannia Industries Limited",
+#         "reason_for_recommendation": "Market leader in biscuits and bakery products with strong pricing power. Consistent revenue growth and robust margins.",
+#         "current_market_cap_category": "Large Cap",
+#         "primary_sector": "FMCG"
+#     },
+#     {
+#         "stock_symbol": "TATACONSUM",
+#         "company_name": "Tata Consumer Products Limited",
+#         "reason_for_recommendation": "Expanding FMCG footprint with trusted brands in staples, beverages, and snacks. Strategic acquisitions and stable demand support low-risk profile.",
+#         "current_market_cap_category": "Large Cap",
+#         "primary_sector": "FMCG"
+#     }
+# ]
+# ```
+# '''
 
