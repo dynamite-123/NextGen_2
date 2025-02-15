@@ -5,7 +5,7 @@ import numpy as np
 import yfinance as yf 
 import requests
 from dotenv import load_dotenv
-import os
+# import os
 
 class CustomFloatStr(float):
     def __repr__(self):
@@ -232,4 +232,3 @@ def get_stock_news(stock_symbol):
     except:
         return ""
     
-print(get_stock_news('RELIANCE'))
