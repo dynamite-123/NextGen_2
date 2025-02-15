@@ -11,6 +11,7 @@ from .views import (
     UserManageView,
     gainers_and_losers,
     stock_news,
+    NSECompanyFilterView
 )
 
 urlpatterns = [
@@ -22,5 +23,6 @@ urlpatterns = [
     path('users/', UserListView.as_view(), name='user-list'),
     path('gainers-and-losers/', gainers_and_losers, name='gainers-and-losers'),
     path('stock-news/', stock_news, name='stock-news'),
+    path('stock-suggestions/', NSECompanyFilterView.as_view(), name='stock-suggestions'),
 ]
 

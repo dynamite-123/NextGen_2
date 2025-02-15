@@ -10,13 +10,14 @@ from rest_framework.permissions import AllowAny, IsAuthenticated, BasePermission
 from .utils import get_stock_data, get_nse_top_gainers, get_nse_top_losers, get_stock_news
 from .stock_recommender import get_stock_recommendations_json
 import logging
-from .models import User
+from .models import User, NSECompany
 from .serializers import (
     UserCreateSerializer,
     LoginSerializer,
     UserUpdateSerializer,
     UserListSerializer,
     UserSerializer,
+    NSECompanySerializer,
 )
 
 
@@ -210,6 +211,23 @@ class UserListView(generics.ListAPIView):
             return Response(
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+class NSECompanyFilterView(APIView):
+    def get(self, request, *args, **kwargs):
+        symbol_prefix = request.query_params.get('symbol', None)  # Get the symbol query parameter
+        company_dict = {}
+        if symbol_prefix:
+            # Filter companies whose symbol starts with the provided prefix (case insensitive)
+            companies = NSECompany.objects.filter(symbol__istartswith=symbol_prefix)[:5]
+            
+            symbols = []
+            for comp in companies:
+                symbols.append(comp.symbol)
+            
+            return Response(symbols, status=status.HTTP_200_OK)
+        
+        return Response({"detail": "Symbol parameter is required."}, status=status.HTTP_400_BAD_REQUEST)
+    
 
 @api_view(["GET"])
 def gainers_and_losers(request, *args, **kwargs):
