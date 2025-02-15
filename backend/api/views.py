@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import status, generics
 from rest_framework.permissions import AllowAny, IsAuthenticated, BasePermission
-from .utils import get_stock_data
+# from .utils import get_stock_data
 from .stock_recommender import get_stock_recommendations_json
 import logging
 from .models import User

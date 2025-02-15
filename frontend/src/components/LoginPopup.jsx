@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
-
-const AuthModal = ({ isOpen, onClose }) => {
-  const [isSignIn, setIsSignIn] = useState(false);
+import axios from 'axios';
+const AuthModal = ({ isOpen, onClose, onAuthSuccess }) => {
+  const [isRegister, setIsRegister] = useState(false);
   const [formData, setFormData] = useState({
-    fullName: '',
-    phone: '',
-    experience: '',
-    email: '',
+    username: '',
+    phone_number: '',
+    first_name: '',
+    last_name: '',
     password: ''
   });
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -22,33 +24,54 @@ const AuthModal = ({ isOpen, onClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    setIsLoading(true);
+    
     try {
-      // Replace with your actual API endpoint
-      const endpoint = isSignIn ? '/api/register' : '/api/login';
-      const response = await fetch(endpoint, {
-        method: 'POST',
+      // Correct the endpoint logic - isRegister true means we use register endpoint
+      const endpoint = isRegister ? 'http://127.0.0.1:8000/api/user/register/' : 'http://127.0.0.1:8000/api/user/login/';
+      const response = await axios.post(endpoint, formData, {
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
       });
-      
-      if (response.ok) {
-        const data = await response.json();
-        onClose();
-        // Handle successful auth
+      console.log("Full Response:", response); // Log full response
+      console.log("Response Data:", response.data);
+      if (response.status !== 200) {
+        throw new Error(response.data.message || "Authentication failed");
       }
+      
+      const data =  response.data;
+      
+      // Store token in localStorage
+      if (data.token) {
+        const url = "http://127.0.0.1:8000/api/user/4/";
+        const headers = {"Authorization": `Bearer ${data.token}`};
+        axios.put(url, data, { headers })
+        .then(data => console.log("Response:", data))
+        .catch(error => console.error("Error:", error));
+      }
+      
+      // Call the success callback if provided
+      if (onAuthSuccess) {
+        onAuthSuccess(data);
+      }
+      
+      // Close the modal
+      onClose();
+      
     } catch (error) {
       console.error('Auth error:', error);
+      setError(error.message || 'Failed to authenticate. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
   
-
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-[rgba(0,0,0,0.7)] flex items-center justify-center z-50
-">
+    <div className="fixed inset-0 bg-[rgba(0,0,0,0.7)] flex items-center justify-center z-50">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
@@ -63,54 +86,57 @@ const AuthModal = ({ isOpen, onClose }) => {
         </button>
 
         <h2 className="text-2xl font-bold text-white mb-6 text-center">
-          {isSignIn ? "Register" : "Login"}
+          {isRegister ? "Register" : "Login"}
         </h2>
 
+        {error && (
+          <div className="mb-4 p-2 bg-red-500 bg-opacity-20 border border-red-500 rounded text-red-300 text-sm">
+            {error}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
-          {isSignIn && (
-            <>
-              <input 
-                type="text" 
-                name="fullName" 
-                placeholder="Full Name" 
-                value={formData.fullName} 
-                onChange={handleChange}
-                className="w-full px-4 py-2 rounded bg-gray-700 text-white" 
-                required={!isSignIn} 
-              />
-              <input 
-                type="tel" 
-                name="phone" 
-                placeholder="Phone Number" 
-                value={formData.phone} 
-                onChange={handleChange}
-                className="w-full px-4 py-2 rounded bg-gray-700 text-white" 
-                required 
-              />
-              <select 
-                name="experience" 
-                value={formData.experience} 
-                onChange={handleChange}
-                className="w-full px-4 py-2 rounded bg-gray-700 text-white" 
-                required
-              >
-                <option value="">Investment Experience</option>
-                <option value="Beginner">Beginner</option>
-                <option value="Intermediate">Intermediate</option>
-                <option value="Expert">Expert</option>
-              </select>
-            </>
-          )}
-          
           <input 
-            type="email" 
-            name="email" 
-            placeholder="Email" 
-            value={formData.email} 
+            type="text" 
+            name="username" 
+            placeholder="User Name" 
+            value={formData.username} 
             onChange={handleChange}
             className="w-full px-4 py-2 rounded bg-gray-700 text-white" 
             required 
           />
+          {isRegister && (
+            <>
+              <input 
+                type="tel" 
+                name="phone_number" 
+                placeholder="Phone Number" 
+                value={formData.phone_number} 
+                onChange={handleChange}
+                className="w-full px-4 py-2 rounded bg-gray-700 text-white" 
+                required 
+              />
+              <input 
+                type="text"
+                name="first_name" 
+                placeholder='enter first name'
+                value={formData.first_name} 
+                onChange={handleChange}
+                className="w-full px-4 py-2 rounded bg-gray-700 text-white" 
+                required
+              />
+              <input 
+                type="text"
+                name="last_name" 
+                placeholder='enter last name'
+                value={formData.last_name} 
+                onChange={handleChange}
+                className="w-full px-4 py-2 rounded bg-gray-700 text-white" 
+                required
+              />
+            </>
+          )}
+          
           <input 
             type="password" 
             name="password" 
@@ -123,19 +149,25 @@ const AuthModal = ({ isOpen, onClose }) => {
 
           <button 
             type="submit" 
-            className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition"
+            className={`w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition ${
+              isLoading ? 'opacity-70 cursor-not-allowed' : ''
+            }`}
+            disabled={isLoading}
           >
-            {isSignIn ? "Register" : "Login"}
+            {isLoading ? 
+              (isRegister ? "Registering..." : "Logging in...") : 
+              (isRegister ? "Register" : "Login")
+            }
           </button>
         </form>
 
         <p className="text-gray-400 text-center mt-4">
-          {isSignIn ? "Already have an account?" : "Don't have an account?"}{" "}
+          {isRegister ? "Already have an account?" : "Don't have an account?"}{" "}
           <button 
-            onClick={() => setIsSignIn(!isSignIn)} 
+            onClick={() => setIsRegister(!isRegister)} 
             className="text-blue-500 hover:underline"
           >
-            {isSignIn ? "Login" : "Register"}
+            {isRegister ? "Login" : "Register"}
           </button>
         </p>
       </motion.div>
