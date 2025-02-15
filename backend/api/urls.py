@@ -10,6 +10,7 @@ from .views import (
     # get_user_by_id,
     UserManageView,
     gainers_and_losers,
+    stock_news,
 )
 
 urlpatterns = [
@@ -20,5 +21,6 @@ urlpatterns = [
     path("user/<int:pk>/", UserManageView.as_view(), name="user-manage"),
     path('users/', UserListView.as_view(), name='user-list'),
     path('gainers-and-losers/', gainers_and_losers, name='gainers-and-losers'),
+    path('stock-news/', stock_news, name='stock-news'),
 ]
 

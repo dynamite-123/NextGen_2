@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import status, generics
 from rest_framework.permissions import AllowAny, IsAuthenticated, BasePermission
-from .utils import get_stock_data, get_nse_top_gainers, get_nse_top_losers
+from .utils import get_stock_data, get_nse_top_gainers, get_nse_top_losers, get_stock_news
 from .stock_recommender import get_stock_recommendations_json
 import logging
 from .models import User
@@ -212,7 +212,7 @@ class UserListView(generics.ListAPIView):
             )
 
 @api_view(["GET"])
-def gainers_and_losers(*args, **kwargs):
+def gainers_and_losers(request, *args, **kwargs):
 
     try:
         data = {}
@@ -229,3 +229,29 @@ def gainers_and_losers(*args, **kwargs):
 
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(["GET"])
+def stock_news(request):
+    symbol = request.GET.get("symbol")
+
+    if not symbol:
+        return Response(
+            {"error": "Stock symbol is required."}, status=status.HTTP_400_BAD_REQUEST
+        )
+
+    try:
+        data = get_stock_news(symbol)
+        if not data:
+            return Response(
+                {"error": "No data found for this stock."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        return Response({
+            "news": data
+        }, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+

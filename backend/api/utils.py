@@ -2,8 +2,10 @@ from yahooquery import Ticker
 import json
 import pandas as pd
 import numpy as np
-import yfinance as yf
-
+import yfinance as yf 
+import requests
+from dotenv import load_dotenv
+import os
 
 class CustomFloatStr(float):
     def __repr__(self):
@@ -218,3 +220,16 @@ def get_nse_top_losers():
     top_losers = sorted(losers, key=lambda x: x['change'])[:5]
     
     return top_losers
+
+def get_stock_news(stock_symbol):
+    url = f"https://query1.finance.yahoo.com/v1/finance/search?q={stock_symbol}&newsCount=5"
+    try:
+        response = requests.get(url, headers={"User-Agent": "Mozilla/5.0"})
+        news = response.json().get("news", [])
+        res = [article["title"] for article in news]
+        res = '. '.join(res)
+        return res
+    except:
+        return ""
+    
+print(get_stock_news('RELIANCE'))
