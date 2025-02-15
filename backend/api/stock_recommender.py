@@ -9,7 +9,7 @@ load_dotenv()
 
 # Initialize Together client
 client = Together(
-    api_key=os.environ['API_KEY']
+    api_key=os.environ['TOGETHER_AI_KEY']
 )
 
 
