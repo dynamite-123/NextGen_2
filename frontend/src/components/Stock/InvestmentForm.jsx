@@ -1,6 +1,7 @@
-import { useState,useEffect } from "react";
-import { useNavigate,useLocation } from "react-router";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router";
 import { useAuth } from "../../context/AppContext";
+
 const InvestmentForm = ({ onSubmit }) => {
   const [formData, setFormData] = useState({
     amount: "",
@@ -9,18 +10,16 @@ const InvestmentForm = ({ onSubmit }) => {
     riskTolerance: "low",
     sector: "automobile",
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
-  const {isAuthenticated} = useAuth();
+  const { isAuthenticated } = useAuth();
   const [apiData, setApiData] = useState(null);
-
 
   useEffect(() => {
     if (!isAuthenticated) {
-      // Clear the API response data
       setApiData(null);
-      // Reset form to initial state
       setFormData({
         amount: "",
         time: "",
@@ -30,6 +29,7 @@ const InvestmentForm = ({ onSubmit }) => {
       });
     }
   }, [isAuthenticated]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (name === "amount" && (value < 1 || value > 100000000)) return;
@@ -41,13 +41,13 @@ const InvestmentForm = ({ onSubmit }) => {
     e.preventDefault();
 
     if (!isAuthenticated) {
-
       navigate('/login', { 
         state: { from: location.pathname }
       });
       return;
     }
 
+    setIsLoading(true);
     const requestData = {
       investment_amount: parseInt(formData.amount),
       investment_duration: parseInt(formData.time),
@@ -68,6 +68,8 @@ const InvestmentForm = ({ onSubmit }) => {
       setApiData(data);
     } catch (error) {
       console.error("Error fetching data:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -138,28 +140,48 @@ const InvestmentForm = ({ onSubmit }) => {
           </select>
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 p-4 rounded-xl text-white font-bold transition shadow-lg text-lg mt-4"
+            disabled={isLoading}
+            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed p-4 rounded-xl text-white font-bold transition shadow-lg text-lg mt-4 flex items-center justify-center"
           >
-            Submit
+            {isLoading ? (
+              <>
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Processing...
+              </>
+            ) : (
+              'Submit'
+            )}
           </button>
         </form>
       </div>
-      {console.log(apiData)}
-      {isAuthenticated && apiData && (
+      
+      {isAuthenticated && (
         <div className="mt-8 w-full max-w-6xl mx-auto border-t border-gray-700 pt-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {apiData.slice(0, 6).map((stock, index) => (
-              <div key={index} className="p-4 bg-gray-800 rounded-2xl shadow-xl border border-gray-600">
-                <h3 className="font-bold text-xl text-blue-400">{stock.company_name} ({stock.stock_symbol})</h3>
-                <p className="text-gray-300 mt-2 text-base leading-relaxed">{stock.reason_for_recommendation}</p>
-                <p className="text-gray-400 mt-2 text-sm font-semibold"><span className="text-white">Market Cap:</span> {stock.current_market_cap_category}</p>
-                <p className="text-gray-400 text-sm font-semibold"><span className="text-white">Sector:</span> {stock.primary_sector}</p>
-              </div>
-            ))}
-            <p className="text-gray-500 text-base mt-4 text-center italic col-span-full"> Disclaimer: The stock market data provided is for informational purposes only. 
-  We do not guarantee the accuracy, completeness, or reliability of the information. 
-  Please conduct your own research before making any investment decisions.</p>
-          </div>
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center p-8">
+              <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-400 mb-4"></div>
+              <p className="text-blue-400 font-semibold">Analyzing investment options...</p>
+            </div>
+          ) : apiData && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {apiData.slice(0, 6).map((stock, index) => (
+                <div key={index} className="p-4 bg-gray-800 rounded-2xl shadow-xl border border-gray-600">
+                  <h3 className="font-bold text-xl text-blue-400">{stock.company_name} ({stock.stock_symbol})</h3>
+                  <p className="text-gray-300 mt-2 text-base leading-relaxed">{stock.reason_for_recommendation}</p>
+                  <p className="text-gray-400 mt-2 text-sm font-semibold"><span className="text-white">Market Cap:</span> {stock.current_market_cap_category}</p>
+                  <p className="text-gray-400 text-sm font-semibold"><span className="text-white">Sector:</span> {stock.primary_sector}</p>
+                </div>
+              ))}
+              <p className="text-gray-500 text-base mt-4 text-center italic col-span-full">
+                Disclaimer: The stock market data provided is for informational purposes only. 
+                We do not guarantee the accuracy, completeness, or reliability of the information. 
+                Please conduct your own research before making any investment decisions.
+              </p>
+            </div>
+          )}
         </div>
       )}
     </div>
