@@ -55,3 +55,14 @@ class NSECompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = NSECompany
         fields = ['symbol', 'name']  # Include the fields you want to expose (basically response model)
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(write_only=True, required=True)
+    new_password = serializers.CharField(write_only=True, required=True)
+
+    def validate_old_password(self, value):
+        user = self.context['request'].user
+        if not user.check_password(value):
+            raise serializers.ValidationError("Old password is incorrect.")
+        return value
