@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
+from     django.conf import settings
 
 
 class UserManager(BaseUserManager):
@@ -50,3 +51,10 @@ class NSECompany(models.Model):
 
     def __str__(self):
         return f"{self.symbol} - {self.name}"
+
+class LikedStock(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='liked_stocks')
+    stock_symbol = models.CharField(max_length=20)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.stock_symbol}"

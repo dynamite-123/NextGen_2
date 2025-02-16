@@ -1,4 +1,5 @@
 import requests
+from django.http import JsonResponse
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth import authenticate, get_user_model
 from django.shortcuts import get_object_or_404
@@ -11,7 +12,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated, BasePermission
 from .utils import get_stock_data, get_nse_top_gainers, get_nse_top_losers, get_stock_news
 from .stock_recommender import get_stock_recommendations_json
 import logging
-from .models import User, NSECompany
+from .models import User, NSECompany, LikedStock
 from .serializers import (
     UserCreateSerializer,
     LoginSerializer,
@@ -20,6 +21,8 @@ from .serializers import (
     UserSerializer,
     NSECompanySerializer,
     ChangePasswordSerializer,
+    LikedStockSerializer,
+    AddLikedStockSerializer,
 )
 from .get_news import get_all_news
 from .sentiment_analysis import FinancialSentimentAnalyzer
@@ -321,3 +324,24 @@ class ChangePasswordView(APIView):
             return Response({"detail": "Password changed successfully"}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+#liking a stock
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def add_liked_stock(request):
+    serializer = AddLikedStockSerializer(data=request.data, context={'request': request})
+    if serializer.is_valid():
+        serializer.save()
+        return Response({"message": "Stock added to liked list"}, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+def user_liked_stocks(request):
+    liked_stocks_by_user = {}
+
+    users = User.objects.prefetch_related('liked_stocks').all()
+
+    for user in users:
+        liked_stocks_by_user[user.id] = [stock.stock_symbol for stock in user.liked_stocks.all()]
+
+    return JsonResponse(liked_stocks_by_user,safe=False)
