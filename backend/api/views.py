@@ -26,7 +26,7 @@ from .serializers import (
 )
 from .get_news import get_all_news
 from .sentiment_analysis import FinancialSentimentAnalyzer
-
+import yfinance as yf
 
 class IsAdminOrSuperuser(BasePermission):
     def has_permission(self, request, view):
@@ -345,3 +345,27 @@ def user_liked_stocks(request):
         liked_stocks_by_user[user.id] = [stock.stock_symbol for stock in user.liked_stocks.all()]
 
     return JsonResponse(liked_stocks_by_user,safe=False)
+
+def get_500_nse_companies(request):
+    # Fetch the top 500 companies from your database
+    companies = NSECompany.objects.all()[:500]
+    symbols = [company.symbol + '.NS' for company in companies]
+
+    # Fetch current day's price data from Yahoo Finance
+    data = yf.download(tickers=symbols, period="1d", interval="1d", group_by='ticker')
+
+    company_data = []
+    for company in companies:
+        symbol = company.symbol + '.NS'
+        if symbol in data:
+            open_price = data[symbol]['Open'].iloc[0]
+            close_price = data[symbol]['Close'].iloc[0]
+            change_percent = ((close_price - open_price) / open_price) * 100
+            company_data.append({
+                'symbol': company.symbol,
+                'open': round(open_price, 2),
+                'close': round(close_price, 2),
+                'change': round(change_percent, 2)
+            })
+
+    return JsonResponse({'companies': company_data})
