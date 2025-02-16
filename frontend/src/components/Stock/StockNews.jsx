@@ -4,6 +4,7 @@ const StockNews = ({ symbol }) => {
   const [news, setNews] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  
   useEffect(() => {
     const fetchNews = async () => {
       try {

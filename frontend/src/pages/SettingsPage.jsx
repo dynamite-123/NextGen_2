@@ -68,20 +68,15 @@ const SettingsPage = () => {
       const userData = user.user || JSON.parse(localStorage.getItem('userData'));
       const userId = userData?.id || '4'; // Fallback to '4' if no ID found
 
-      const response = await axios.put(
-        `http://127.0.0.1:8000/api/user/${userId}/`,
+      const response = await axios.post(
+        `http://127.0.0.1:8000/api/change-password/`,
         {
-          username: formData.username,
-          first_name: formData.first_name,
-          last_name: formData.last_name,
-          phone_number: formData.phone_number,
-          email: formData.email,
-          ...(formData.new_password && { password: formData.new_password })
+          old_password : formData.current_password,
+          new_password : formData.new_password
         },
         {
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${userData.token}`
+            'Authorization': `Bearer ${user.access}`
           }
         }
       );
@@ -192,30 +187,41 @@ const SettingsPage = () => {
               </div>
 
               {isEditing && (
-                <>
-                  <div>
-                    <label className="block text-gray-300 mb-2">New Password</label>
-                    <input
-                      type="password"
-                      name="new_password"
-                      value={formData.new_password}
-                      onChange={handleChange}
-                      className="w-full px-4 py-2 rounded bg-gray-700 text-white border border-gray-600 focus:border-blue-500 focus:outline-none"
-                    />
-                  </div>
+  <>
+    <div>
+      <label className="block text-gray-300 mb-2">Old Password</label>
+      <input
+        type="password"
+        name="current_password"
+        value={formData.current_password}
+        onChange={handleChange}
+        className="w-full px-4 py-2 rounded bg-gray-700 text-white border border-gray-600 focus:border-blue-500 focus:outline-none"
+      />
+    </div>
 
-                  <div>
-                    <label className="block text-gray-300 mb-2">Confirm New Password</label>
-                    <input
-                      type="password"
-                      name="confirm_password"
-                      value={formData.confirm_password}
-                      onChange={handleChange}
-                      className="w-full px-4 py-2 rounded bg-gray-700 text-white border border-gray-600 focus:border-blue-500 focus:outline-none"
-                    />
-                  </div>
-                </>
-              )}
+    <div>
+      <label className="block text-gray-300 mb-2">New Password</label>
+      <input
+        type="password"
+        name="new_password"
+        value={formData.new_password}
+        onChange={handleChange}
+        className="w-full px-4 py-2 rounded bg-gray-700 text-white border border-gray-600 focus:border-blue-500 focus:outline-none"
+      />
+    </div>
+
+    <div>
+      <label className="block text-gray-300 mb-2">Confirm New Password</label>
+      <input
+        type="password"
+        name="confirm_password"
+        value={formData.confirm_password}
+        onChange={handleChange}
+        className="w-full px-4 py-2 rounded bg-gray-700 text-white border border-gray-600 focus:border-blue-500 focus:outline-none"
+      />
+    </div>
+  </>
+)}
             </div>
 
             <div className="flex justify-between items-center pt-4 border-t border-gray-700">

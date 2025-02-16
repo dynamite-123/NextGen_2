@@ -13,7 +13,7 @@ import StockNews from '../components/Stock/StockNews';
 const Dashboard = () => {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const { isAuthenticated } = useAuth();
-  const { selectedStock,setSelectedStock } = useStock();
+  const { selectedStock,setSelectedStock,searchQuery } = useStock();
 
   // Check localStorage on component mount
   useEffect(() => {
@@ -41,7 +41,7 @@ const Dashboard = () => {
           {selectedStock ? (
             <>
               <StockOverview stock={selectedStock} />
-              <StockNews symbol={selectedStock.symbol}/>
+              <StockNews symbol={searchQuery}/>
               <StockChart stock={selectedStock} />
               <BalanceSheet stock={selectedStock} />
               <CashFlows stock={selectedStock} />

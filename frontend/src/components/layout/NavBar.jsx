@@ -55,7 +55,6 @@ const Navbar = () => {
       setSuggestions([]);
       return;
     }
-
     try {
       const response = await fetch(`http://127.0.0.1:8000/api/stock-suggestions/?symbol=${encodeURIComponent(query)}`);
       if (!response.ok) throw new Error('Failed to fetch suggestions');
@@ -97,7 +96,6 @@ const Navbar = () => {
         return;
       }
       handleSearchChange(e);
-      
       setSuggestions([]);
     }
   };
