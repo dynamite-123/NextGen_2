@@ -15,6 +15,8 @@ from .views import (
     nifty50_chart,
     sentiments_view,
     ChangePasswordView,
+    add_liked_stock,
+    user_liked_stocks,
 )
 
 urlpatterns = [
@@ -30,6 +32,8 @@ urlpatterns = [
     path('nifty50-chart/', nifty50_chart, name='nifty50-chart'),
     path('sentiments/', sentiments_view, name='sentiments'),
     path('change-password/', ChangePasswordView.as_view(), name='change-password'),
+    path('liked-stocks/',user_liked_stocks, name='user-linked-stocks'),
+    path('add-liked-stocks/',add_liked_stock, name='add-liked-stocks'),
 
 ]
 

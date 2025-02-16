@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
-from .models import NSECompany
+from .models import NSECompany, LikedStock
 
 User = get_user_model()
 
@@ -66,3 +66,19 @@ class ChangePasswordSerializer(serializers.Serializer):
         if not user.check_password(value):
             raise serializers.ValidationError("Old password is incorrect.")
         return value
+
+
+class LikedStockSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LikedStock
+        fields = ['stock_symbol']
+
+
+class AddLikedStockSerializer(serializers.Serializer):
+    stock_symbol = serializers.CharField(max_length=50)
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        stock_symbol = validated_data['stock_symbol']
+        liked_stock, created = LikedStock.objects.get_or_create(user=user, stock_symbol=stock_symbol)
+        return liked_stock
