@@ -24,42 +24,81 @@ const Login = () => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: value.trim()
     }));
+  };
+
+  const validateForm = () => {
+    if (!formData.username || !formData.password) {
+      setError('Username and password are required');
+      return false;
+    }
+    
+    if (isRegister) {
+      if (!formData.phone_number || !formData.first_name || !formData.last_name) {
+        setError('All fields are required for registration');
+        return false;
+      }
+      
+      const phoneRegex = /^\+?[\d\s-]{10,}$/;
+      if (!phoneRegex.test(formData.phone_number)) {
+        setError('Please enter a valid phone number');
+        return false;
+      }
+    }
+    
+    return true;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    
+    if (!validateForm()) {
+      return;
+    }
+    
     setIsLoading(true);
     
     try {
       const endpoint = isRegister ? 'http://127.0.0.1:8000/api/user/register/' : 'http://127.0.0.1:8000/api/user/login/';
+      
       const response = await axios.post(endpoint, formData, {
         headers: {
           "Content-Type": "application/json",
         },
       });
 
-      if (response.status !== 200 && response.status !== 201) {
-        throw new Error(response.data?.message || "Authentication failed");
-      }
-      
+      // Log the response for debugging
+      console.log('API Response:', response);
+
       const data = response.data;
       
-      if (data.token) {
-        const url = "http://127.0.0.1:8000/api/user/4/";
-        const headers = {"Authorization": `Bearer ${data.token}`};
-        await axios.put(url, data, { headers });
+      // Handle the profile update if there's a token
+      if (data && data.token) {
+        try {
+          const url = "http://127.0.0.1:8000/api/user/4/";
+          const headers = {"Authorization": `Bearer ${data.token}`};
+          await axios.put(url, data, { headers });
+        } catch (updateError) {
+          console.error('Profile update error:', updateError);
+          // Continue with login even if profile update fails
+        }
       }
       
+      // Call login regardless of token presence - let the auth context handle validation
       login(data);
       const from = location.state?.from?.pathname || "/dashboard";
       navigate(from, { replace: true });
       
     } catch (error) {
       console.error('Auth error:', error);
-      setError(error.message || 'Failed to authenticate. Please try again.');
+      setError(
+        error.response?.data?.message || 
+        error.response?.data?.error || 
+        error.message || 
+        'Authentication failed. Please check your credentials and try again.'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -78,69 +117,75 @@ const Login = () => {
         </h2>
 
         {error && (
-          <div className="mb-4 p-2 bg-red-500 bg-opacity-20 border border-red-500 rounded text-red-300 text-sm">
+          <div className="mb-4 p-3 bg-red-500 bg-opacity-20 border border-red-500 rounded text-red-300 text-sm">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input 
-            type="text" 
-            name="username" 
-            placeholder="Username" 
-            value={formData.username} 
-            onChange={handleChange}
-            className="w-full px-4 py-2 rounded bg-gray-700 text-white border border-gray-600 focus:border-blue-500 focus:outline-none" 
-            required 
-          />
-          
-          {isRegister && (
-            <>
-              <input 
-                type="tel" 
-                name="phone_number" 
-                placeholder="Phone Number" 
-                value={formData.phone_number} 
-                onChange={handleChange}
-                className="w-full px-4 py-2 rounded bg-gray-700 text-white border border-gray-600 focus:border-blue-500 focus:outline-none" 
-                required 
-              />
-              <input 
-                type="text"
-                name="first_name" 
-                placeholder="First Name"
-                value={formData.first_name} 
-                onChange={handleChange}
-                className="w-full px-4 py-2 rounded bg-gray-700 text-white border border-gray-600 focus:border-blue-500 focus:outline-none" 
-                required
-              />
-              <input 
-                type="text"
-                name="last_name" 
-                placeholder="Last Name"
-                value={formData.last_name} 
-                onChange={handleChange}
-                className="w-full px-4 py-2 rounded bg-gray-700 text-white border border-gray-600 focus:border-blue-500 focus:outline-none" 
-                required
-              />
-            </>
-          )}
-          
-          <input 
-            type="password" 
-            name="password" 
-            placeholder="Password" 
-            value={formData.password} 
-            onChange={handleChange}
-            className="w-full px-4 py-2 rounded bg-gray-700 text-white border border-gray-600 focus:border-blue-500 focus:outline-none" 
-            required 
-          />
+        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+          <div className="space-y-4">
+            <input 
+              type="text" 
+              name="username" 
+              placeholder="Username" 
+              value={formData.username} 
+              onChange={handleChange}
+              className="w-full px-4 py-2 rounded bg-gray-700 text-white border border-gray-600 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" 
+              required 
+              disabled={isLoading}
+            />
+            
+            {isRegister && (
+              <>
+                <input 
+                  type="tel" 
+                  name="phone_number" 
+                  placeholder="Phone Number" 
+                  value={formData.phone_number} 
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 rounded bg-gray-700 text-white border border-gray-600 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" 
+                  required 
+                  disabled={isLoading}
+                />
+                <input 
+                  type="text"
+                  name="first_name" 
+                  placeholder="First Name"
+                  value={formData.first_name} 
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 rounded bg-gray-700 text-white border border-gray-600 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" 
+                  required
+                  disabled={isLoading}
+                />
+                <input 
+                  type="text"
+                  name="last_name" 
+                  placeholder="Last Name"
+                  value={formData.last_name} 
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 rounded bg-gray-700 text-white border border-gray-600 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" 
+                  required
+                  disabled={isLoading}
+                />
+              </>
+            )}
+            
+            <input 
+              type="password" 
+              name="password" 
+              placeholder="Password" 
+              value={formData.password} 
+              onChange={handleChange}
+              className="w-full px-4 py-2 rounded bg-gray-700 text-white border border-gray-600 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" 
+              required 
+              disabled={isLoading}
+              minLength={6}
+            />
+          </div>
 
           <button 
             type="submit" 
-            className={`w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition-colors ${
-              isLoading ? 'opacity-70 cursor-not-allowed' : ''
-            }`}
+            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition-colors disabled:opacity-70 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800"
             disabled={isLoading}
           >
             {isLoading ? 
@@ -153,8 +198,19 @@ const Login = () => {
         <p className="text-gray-400 text-center mt-4">
           {isRegister ? "Already have an account?" : "Don't have an account?"}{" "}
           <button 
-            onClick={() => setIsRegister(!isRegister)} 
-            className="text-blue-500 hover:text-blue-400 transition-colors"
+            onClick={() => {
+              setIsRegister(!isRegister);
+              setError('');
+              setFormData({
+                username: '',
+                phone_number: '',
+                first_name: '',
+                last_name: '',
+                password: ''
+              });
+            }} 
+            className="text-blue-500 hover:text-blue-400 transition-colors focus:outline-none focus:underline"
+            disabled={isLoading}
           >
             {isRegister ? "Sign In" : "Create Account"}
           </button>

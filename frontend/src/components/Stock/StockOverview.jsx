@@ -1,43 +1,53 @@
-import { useStock } from "../../context/AppContext";
+import { useState } from "react";
+import { Star, StarOff } from "lucide-react";
 
 const StockOverview = ({ stock }) => {
-  // Format large numbers with commas and appropriate suffixes
+  const [isStarred, setIsStarred] = useState(false);
+
+  const toggleWatchlist = () => {
+    setIsStarred((prev) => !prev);
+  };
+
   const formatNumber = (num) => {
-    if (!num) return 'N/A';
-    if (num >= 1e9) {
-      return `${(num / 1e9).toFixed(2)}B`;
-    } else if (num >= 1e6) {
-      return `${(num / 1e6).toFixed(2)}M`;
-    } else if (num >= 1e3) {
-      return `${(num / 1e3).toFixed(2)}K`;
-    }
+    if (!num) return "N/A";
+    if (num >= 1e9) return `${(num / 1e9).toFixed(2)}B`;
+    if (num >= 1e6) return `${(num / 1e6).toFixed(2)}M`;
+    if (num >= 1e3) return `${(num / 1e3).toFixed(2)}K`;
     return num.toFixed(2);
   };
 
-  // Safe number formatting helper
-  const formatDecimal = (num) => {
-    return num ? num.toFixed(2) : 'N/A';
-  };
+  const formatDecimal = (num) => (num ? num.toFixed(2) : "N/A");
 
-  // Early return if stock is undefined
-  if (!stock) {
-    return <div className="bg-gray-700 p-6 rounded-lg">Loading...</div>;
-  }
+  if (!stock) return <div className="bg-gray-700 p-6 rounded-lg">Loading...</div>;
 
   return (
     <div className="bg-gray-700 p-6 rounded-lg">
-      <h3 className="text-xl font-semibold text-white mb-6">
-        {stock.overview.longName || 'Unknown Company'}
-      </h3>
-      
+      <div className="flex justify-between items-center">
+        <h3 className="text-xl font-semibold text-white">
+          {stock.overview.longName || "Unknown Company"}
+        </h3>
+        {/* Star Button */}
+        <button onClick={toggleWatchlist} className="p-2 text-yellow-500 hover:text-yellow-600">
+          {isStarred ? <Star size={24} fill="currentColor" /> : <StarOff size={24} />}
+        </button>
+      </div>
+
       {/* Main Price Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <div className="space-y-2">
-          <p className="text-gray-400">Current Price ({stock.overview.currency || 'INR'})</p>
-          <p className={`text-3xl font-bold ${(stock.overview.regularMarketChangePercent || 0) < 0 ? "text-red-500" : "text-green-500"}`}>
+          <p className="text-gray-400">Current Price ({stock.overview.currency || "INR"})</p>
+          <p
+            className={`text-3xl font-bold ${
+              (stock.overview.regularMarketChangePercent || 0) < 0 ? "text-red-500" : "text-green-500"
+            }`}
+          >
             {formatDecimal(stock.overview.regularMarketPreviousClose)}
           </p>
-          <p className={`text-lg ${(stock.overview.regularMarketChangePercent || 0) < 0 ? "text-red-400" : "text-green-400"}`}>
+          <p
+            className={`text-lg ${
+              (stock.overview.regularMarketChangePercent || 0) < 0 ? "text-red-400" : "text-green-400"
+            }`}
+          >
             {formatDecimal(stock.overview.regularMarketChangePercent)}%
           </p>
         </div>

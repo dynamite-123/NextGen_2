@@ -8,7 +8,6 @@ export const AppProvider = ({ children }) => {
   // Auth state
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-
   // Check authentication status on initial load
   useEffect(() => {
     const storedAuth = localStorage.getItem('isAuthenticated');
@@ -210,7 +209,8 @@ const handleSearchChange = useCallback((e) => {
           handleSearchChange,
           clearSearch,
           selectedStock,
-          setSelectedStock
+          setSelectedStock,
+          
         }}
       >
         <MarketContext.Provider
