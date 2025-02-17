@@ -75,7 +75,7 @@ export const AppProvider = ({ children }) => {
       try {
         setMarketLoading(true);
         const response = await fetch('http://127.0.0.1:8000/api/nifty50-chart/');
-
+        console.log("Nifty 50 response :",response);
         if (!response.ok) {
           throw new Error('Failed to fetch NIFTY50 data');
         }
