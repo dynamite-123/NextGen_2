@@ -185,7 +185,6 @@ def get_nse_top_gainers():
     
     return top_gainers
 
-
 def get_nse_top_losers():
     nifty50_symbols = [
         "RELIANCE.NS", "TCS.NS", "INFY.NS", "HDFCBANK.NS", "ICICIBANK.NS",
@@ -231,4 +230,5 @@ def get_stock_news(stock_symbol):
         return res
     except:
         return ""
+    
     

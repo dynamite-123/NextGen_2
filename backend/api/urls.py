@@ -17,7 +17,7 @@ from .views import (
     ChangePasswordView,
     add_liked_stock,
     user_liked_stocks,
-    get_500_nse_companies,
+    # get_500_nse_companies,
 )
 
 urlpatterns = [
@@ -35,7 +35,7 @@ urlpatterns = [
     path('change-password/', ChangePasswordView.as_view(), name='change-password'),
     path('liked-stocks/',user_liked_stocks, name='user-linked-stocks'),
     path('add-liked-stocks/',add_liked_stock, name='add-liked-stocks'),
-    path('all-companies/',get_500_nse_companies, name='all-companies-data'),
+    # path('all-companies/',get_500_nse_companies, name='all-companies-data'),
 
 ]
 

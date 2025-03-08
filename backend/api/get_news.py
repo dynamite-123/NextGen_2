@@ -1,14 +1,19 @@
 import yfinance as yf
+import requests_cache
 import json
 import requests
 from bs4 import BeautifulSoup
 
-stock = yf.Ticker('DSSL')
-data_str = stock.news
+session = requests_cache.CachedSession('yfinance.cache')
+session.headers['User-Agent'] = 'Mozilla/5.0'  # To mimic a browser request
+# stock = yf.Ticker('DSSL', session=session)
+# data_str = stock.news
+# print(data_str)
 
 def fetch_yahoo_news(symbol: str):
     stock = yf.Ticker(symbol)
     data = stock.news
+    # data = yf.Search(symbol, news_count=10).news
     return data
 
 def extract_yahoo_titles(data_str):
@@ -81,15 +86,16 @@ def extract_google_titles(data):
 
 def get_all_news(symbol):
 
-    res1 = fetch_yahoo_news(symbol)
+    # res1 = fetch_yahoo_news(symbol)
 
     res2 = fetch_google_news(symbol)
 
-    res1 = extract_yahoo_titles(res1)
+    # res1 = extract_yahoo_titles(res1)
 
     res2 = extract_google_titles(res2)
+    return res2 # temp
 
-    return list(set(res1 + res2))
+    # return list(set(res1 + res2))
 
 
 
