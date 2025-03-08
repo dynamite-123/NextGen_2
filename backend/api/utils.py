@@ -230,5 +230,7 @@ def get_stock_news(stock_symbol):
         return res
     except:
         return ""
-    
-    
+
+data = get_nse_top_gainers()
+print(type(data))
+print(data) 

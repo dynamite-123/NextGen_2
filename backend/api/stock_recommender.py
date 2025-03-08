@@ -39,8 +39,8 @@ def get_stock_recommendations(
 
     try:
         response = client.chat.completions.create(
-            # model="meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
-            model="deepseek-ai/DeepSeek-R1",
+            model="meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
+            # model="deepseek-ai/DeepSeek-R1",
 
             messages=[{"role": "user", "content": prompt}],
             stream=False,  # Changed to False to get complete response at once
@@ -62,65 +62,65 @@ def get_stock_recommendations(
         raise Exception("Failed to generate stock recommendations")
 
 # - for llama
-# def clean_llm_response(response: str) -> dict:
-#     """
-#     Clean and parse the LLM response into proper JSON format
-#     """
-#     try:
-#         # Find the JSON array in the response using regex
-#         json_match = re.search(r"\[(.*?)\]", response, re.DOTALL)
-#         if json_match:
-#             json_str = json_match.group(0)
-#             # Parse the JSON array
-#             stocks_data = json.loads(json_str)
+def clean_llm_response(response: str) -> dict:
+    """
+    Clean and parse the LLM response into proper JSON format
+    """
+    try:
+        # Find the JSON array in the response using regex
+        json_match = re.search(r"\[(.*?)\]", response, re.DOTALL)
+        if json_match:
+            json_str = json_match.group(0)
+            # Parse the JSON array
+            stocks_data = json.loads(json_str)
 
-#             # Create the final response structure
-#             cleaned_response = {
-#                 "stocks": stocks_data,
-#                 "disclaimer": "Past performance is not a guarantee of future results. Please conduct your own research and consult with a financial advisor before making any investment decisions.",
-#             }
+            # Create the final response structure
+            cleaned_response = {
+                "stocks": stocks_data,
+                "disclaimer": "Past performance is not a guarantee of future results. Please conduct your own research and consult with a financial advisor before making any investment decisions.",
+            }
 
-#             return cleaned_response
-#         else:
-#             raise ValueError("No JSON array found in response")
+            return cleaned_response
+        else:
+            raise ValueError("No JSON array found in response")
 
-#     except json.JSONDecodeError as e:
-#         logging.error(f"JSON parsing error: {str(e)}")
-#         raise ValueError("Failed to parse response as JSON")
-#     except Exception as e:
-#         logging.error(f"Error cleaning response: {str(e)}")
-#         raise ValueError("Failed to process response")
+    except json.JSONDecodeError as e:
+        logging.error(f"JSON parsing error: {str(e)}")
+        raise ValueError("Failed to parse response as JSON")
+    except Exception as e:
+        logging.error(f"Error cleaning response: {str(e)}")
+        raise ValueError("Failed to process response")
 
 # - for deepseek
-def clean_llm_response(input_string: str) -> list:
-    start_marker = "```json"
-    end_marker = "```"
+# def clean_llm_response(input_string: str) -> list:
+#     start_marker = "```json"
+#     end_marker = "```"
     
-    start_pos = input_string.find(start_marker)
-    if start_pos == -1:
-        return []  # No starting marker found
+#     start_pos = input_string.find(start_marker)
+#     if start_pos == -1:
+#         return []  # No starting marker found
     
-    # Move past the start marker
-    start_pos += len(start_marker)
+#     # Move past the start marker
+#     start_pos += len(start_marker)
     
-    # Find the closing marker after the start position
-    end_pos = input_string.find(end_marker, start_pos)
-    if end_pos == -1:
-        return []  # No ending marker found
+#     # Find the closing marker after the start position
+#     end_pos = input_string.find(end_marker, start_pos)
+#     if end_pos == -1:
+#         return []  # No ending marker found
     
-    # Extract the JSON content
-    json_content = input_string[start_pos:end_pos].strip()
+#     # Extract the JSON content
+#     json_content = input_string[start_pos:end_pos].strip()
     
-    # Handle empty result
-    if not json_content:
-        return []
+#     # Handle empty result
+#     if not json_content:
+#         return []
     
-    try:
-        # Parse the JSON string into a Python object
-        return json.loads(json_content)
-    except json.JSONDecodeError as e:
-        print(f"Error parsing JSON: {e}")
-        return []
+#     try:
+#         # Parse the JSON string into a Python object
+#         return json.loads(json_content)
+#     except json.JSONDecodeError as e:
+#         print(f"Error parsing JSON: {e}")
+#         return []
 
 def get_stock_recommendations_json(
     investment_amount: int,
